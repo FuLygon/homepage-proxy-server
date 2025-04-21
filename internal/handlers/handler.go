@@ -11,11 +11,12 @@ type ServiceHandler interface {
 }
 
 type serviceHandler struct {
-	config           *config.Config
-	adguardService   services.AdGuardHomeService
-	npmService       services.NPMService
-	portainerService services.PortainerService
-	wudService       services.WUDService
+	config            *config.Config
+	adguardService    services.AdGuardHomeService
+	npmService        services.NPMService
+	portainerService  services.PortainerService
+	wudService        services.WUDService
+	uptimeKumaService services.UptimeKumaService
 }
 
 func NewServiceHandler(
@@ -24,13 +25,15 @@ func NewServiceHandler(
 	npmService services.NPMService,
 	portainerService services.PortainerService,
 	wudService services.WUDService,
+	uptimeKumaService services.UptimeKumaService,
 ) ServiceHandler {
 	return &serviceHandler{
-		config:           cfg,
-		adguardService:   adguardService,
-		npmService:       npmService,
-		portainerService: portainerService,
-		wudService:       wudService,
+		config:            cfg,
+		adguardService:    adguardService,
+		npmService:        npmService,
+		portainerService:  portainerService,
+		wudService:        wudService,
+		uptimeKumaService: uptimeKumaService,
 	}
 }
 
@@ -111,8 +114,13 @@ func (h *serviceHandler) getGotifyStatus(c *gin.Context) {
 }
 
 func (h *serviceHandler) getUptimeKumaStatus(c *gin.Context) {
-	c.JSON(200, gin.H{
-		"service": "uptime-kuma",
-		"status":  "ok",
-	})
+	baseConfig := h.config.ServicesConfig.UptimeKuma
+	stats, err := h.uptimeKumaService.GetStats(baseConfig.Url, baseConfig.Slug)
+	if err != nil {
+		c.JSON(500, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+	c.JSON(200, stats)
 }
