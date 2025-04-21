@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"homepage-proxy-server/config"
 	"homepage-proxy-server/internal/handlers"
+	"homepage-proxy-server/internal/services"
 	"log"
 )
 
@@ -28,8 +29,11 @@ func main() {
 		}
 	}
 
+	// Setup services
+	adguardService := services.NewAdGuardHomeService()
+
 	// Setup handlers
-	handler := handlers.NewServiceHandler(conf)
+	handler := handlers.NewServiceHandler(conf, adguardService)
 	handler.SetupRoutes(r)
 
 	// Start server

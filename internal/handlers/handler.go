@@ -3,15 +3,21 @@ package handlers
 import (
 	"github.com/gin-gonic/gin"
 	"homepage-proxy-server/config"
+	"homepage-proxy-server/internal/services"
 )
 
 type ServiceHandler struct {
-	config *config.Config
+	config         *config.Config
+	adguardService *services.AdGuardHomeService
 }
 
-func NewServiceHandler(cfg *config.Config) *ServiceHandler {
+func NewServiceHandler(
+	cfg *config.Config,
+	adguardService *services.AdGuardHomeService,
+) *ServiceHandler {
 	return &ServiceHandler{
-		config: cfg,
+		config:         cfg,
+		adguardService: adguardService,
 	}
 }
 
@@ -44,10 +50,15 @@ func (h *ServiceHandler) getNginxProxyManagerStatus(c *gin.Context) {
 }
 
 func (h *ServiceHandler) getAdGuardHomeStatus(c *gin.Context) {
-	c.JSON(200, gin.H{
-		"service": "adguard-home",
-		"status":  "ok",
-	})
+	baseConfig := h.config.ServicesConfig.AdGuardHome
+	stats, err := h.adguardService.GetStats(baseConfig.Url, baseConfig.Username, baseConfig.Password)
+	if err != nil {
+		c.JSON(500, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+	c.JSON(200, stats)
 }
 
 func (h *ServiceHandler) getPortainerStatus(c *gin.Context) {
