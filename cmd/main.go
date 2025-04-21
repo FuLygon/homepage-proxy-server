@@ -35,9 +35,10 @@ func main() {
 
 	// Setup services
 	adguardService := services.NewAdGuardHomeService(cacheInstance)
+	npmService := services.NewNPMService(cacheInstance)
 
 	// Setup handlers
-	handler := handlers.NewServiceHandler(conf, adguardService)
+	handler := handlers.NewServiceHandler(conf, adguardService, npmService)
 	handler.SetupRoutes(r)
 
 	// Start server

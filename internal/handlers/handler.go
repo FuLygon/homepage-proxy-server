@@ -13,15 +13,18 @@ type ServiceHandler interface {
 type serviceHandler struct {
 	config         *config.Config
 	adguardService services.AdGuardHomeService
+	npmService     services.NPMService
 }
 
 func NewServiceHandler(
 	cfg *config.Config,
 	adguardService services.AdGuardHomeService,
+	npmService services.NPMService,
 ) ServiceHandler {
 	return &serviceHandler{
 		config:         cfg,
 		adguardService: adguardService,
+		npmService:     npmService,
 	}
 }
 
@@ -47,10 +50,15 @@ func (h *serviceHandler) registerServiceRoute(registerFunc func(string, ...gin.H
 }
 
 func (h *serviceHandler) getNginxProxyManagerStatus(c *gin.Context) {
-	c.JSON(200, gin.H{
-		"service": "nginx-proxy-manager",
-		"status":  "ok",
-	})
+	baseConfig := h.config.ServicesConfig.NginxProxyManager
+	stats, err := h.npmService.GetStats(baseConfig.Url, baseConfig.Username, baseConfig.Password)
+	if err != nil {
+		c.JSON(500, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+	c.JSON(200, stats)
 }
 
 func (h *serviceHandler) getAdGuardHomeStatus(c *gin.Context) {
