@@ -34,7 +34,7 @@ func main() {
 	cacheInstance := cache.NewCache()
 
 	// Setup services
-	adguardService := services.NewAdGuardHomeService(cacheInstance)
+	adguardService := services.NewAdGuardHomeService()
 	npmService := services.NewNPMService(cacheInstance)
 	portainerService := services.NewPortainerService()
 
