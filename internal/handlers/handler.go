@@ -11,20 +11,23 @@ type ServiceHandler interface {
 }
 
 type serviceHandler struct {
-	config         *config.Config
-	adguardService services.AdGuardHomeService
-	npmService     services.NPMService
+	config           *config.Config
+	adguardService   services.AdGuardHomeService
+	npmService       services.NPMService
+	portainerService services.PortainerService
 }
 
 func NewServiceHandler(
 	cfg *config.Config,
 	adguardService services.AdGuardHomeService,
 	npmService services.NPMService,
+	portainerService services.PortainerService,
 ) ServiceHandler {
 	return &serviceHandler{
-		config:         cfg,
-		adguardService: adguardService,
-		npmService:     npmService,
+		config:           cfg,
+		adguardService:   adguardService,
+		npmService:       npmService,
+		portainerService: portainerService,
 	}
 }
 
@@ -74,10 +77,15 @@ func (h *serviceHandler) getAdGuardHomeStatus(c *gin.Context) {
 }
 
 func (h *serviceHandler) getPortainerStatus(c *gin.Context) {
-	c.JSON(200, gin.H{
-		"service": "portainer",
-		"status":  "ok",
-	})
+	baseConfig := h.config.ServicesConfig.Portainer
+	stats, err := h.portainerService.GetStats(baseConfig.Url, baseConfig.Key, baseConfig.Env)
+	if err != nil {
+		c.JSON(500, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+	c.JSON(200, stats)
 }
 
 func (h *serviceHandler) getWUDStatus(c *gin.Context) {
