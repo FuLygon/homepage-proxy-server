@@ -64,16 +64,16 @@ func (s *npmService) GetStats(baseUrl, username, password string) (*models.NPMRe
 	defer resp.Body.Close()
 
 	// Parse stats response
-	var proxyHostsList []models.NPMProxyHostsStats
-	if err := json.NewDecoder(resp.Body).Decode(&proxyHostsList); err != nil {
+	var stats []models.NPMProxyHostsStats
+	if err = json.NewDecoder(resp.Body).Decode(&stats); err != nil {
 		return nil, fmt.Errorf("failed to parse stats response: %w", err)
 	}
 
 	response := &models.NPMResponse{
-		Total: len(proxyHostsList),
+		Total: len(stats),
 	}
 
-	for _, host := range proxyHostsList {
+	for _, host := range stats {
 		if host.Enabled {
 			response.Enabled++
 		} else {
