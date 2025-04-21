@@ -8,12 +8,6 @@ type AdGuardHomeResponse struct {
 	Latency  float64 `json:"latency"`
 }
 
-// AdGuardHomeLoginRequest Adguard Home login request
-type AdGuardHomeLoginRequest struct {
-	Name     string `json:"name"`
-	Password string `json:"password"`
-}
-
 // AdGuardHomeStats minimalized response from AdGuard Home API
 type AdGuardHomeStats struct {
 	NumDNSQueries           int     `json:"num_dns_queries"`
