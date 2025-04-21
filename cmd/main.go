@@ -38,10 +38,11 @@ func main() {
 	npmService := services.NewNPMService(cacheInstance)
 	portainerService := services.NewPortainerService()
 	wudService := services.NewWUDService()
+	gotifyService := services.NewGotifyService()
 	uptimeKumaService := services.NewUptimeKumaService()
 
 	// Setup handlers
-	handler := handlers.NewServiceHandler(conf, adguardService, npmService, portainerService, wudService, uptimeKumaService)
+	handler := handlers.NewServiceHandler(conf, adguardService, npmService, portainerService, wudService, gotifyService, uptimeKumaService)
 	handler.SetupRoutes(r)
 
 	// Start server

@@ -16,6 +16,7 @@ type serviceHandler struct {
 	npmService        services.NPMService
 	portainerService  services.PortainerService
 	wudService        services.WUDService
+	gotifyService     services.GotifyService
 	uptimeKumaService services.UptimeKumaService
 }
 
@@ -25,6 +26,7 @@ func NewServiceHandler(
 	npmService services.NPMService,
 	portainerService services.PortainerService,
 	wudService services.WUDService,
+	gotifyService services.GotifyService,
 	uptimeKumaService services.UptimeKumaService,
 ) ServiceHandler {
 	return &serviceHandler{
@@ -33,6 +35,7 @@ func NewServiceHandler(
 		npmService:        npmService,
 		portainerService:  portainerService,
 		wudService:        wudService,
+		gotifyService:     gotifyService,
 		uptimeKumaService: uptimeKumaService,
 	}
 }
@@ -107,10 +110,15 @@ func (h *serviceHandler) getWUDStatus(c *gin.Context) {
 }
 
 func (h *serviceHandler) getGotifyStatus(c *gin.Context) {
-	c.JSON(200, gin.H{
-		"service": "gotify",
-		"status":  "ok",
-	})
+	baseConfig := h.config.ServicesConfig.Gotify
+	stats, err := h.gotifyService.GetStats(baseConfig.Url, baseConfig.Key)
+	if err != nil {
+		c.JSON(500, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+	c.JSON(200, stats)
 }
 
 func (h *serviceHandler) getUptimeKumaStatus(c *gin.Context) {
