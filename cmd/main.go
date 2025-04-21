@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/gin-gonic/gin"
 	"homepage-proxy-server/config"
+	"homepage-proxy-server/internal/cache"
 	"homepage-proxy-server/internal/handlers"
 	"homepage-proxy-server/internal/services"
 	"log"
@@ -29,8 +30,11 @@ func main() {
 		}
 	}
 
+	// Initialize cache
+	cacheInstance := cache.NewCache()
+
 	// Setup services
-	adguardService := services.NewAdGuardHomeService()
+	adguardService := services.NewAdGuardHomeService(cacheInstance)
 
 	// Setup handlers
 	handler := handlers.NewServiceHandler(conf, adguardService)

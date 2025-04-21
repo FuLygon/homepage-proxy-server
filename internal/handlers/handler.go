@@ -6,23 +6,27 @@ import (
 	"homepage-proxy-server/internal/services"
 )
 
-type ServiceHandler struct {
+type ServiceHandler interface {
+	SetupRoutes(r *gin.Engine)
+}
+
+type serviceHandler struct {
 	config         *config.Config
-	adguardService *services.AdGuardHomeService
+	adguardService services.AdGuardHomeService
 }
 
 func NewServiceHandler(
 	cfg *config.Config,
-	adguardService *services.AdGuardHomeService,
-) *ServiceHandler {
-	return &ServiceHandler{
+	adguardService services.AdGuardHomeService,
+) ServiceHandler {
+	return &serviceHandler{
 		config:         cfg,
 		adguardService: adguardService,
 	}
 }
 
 // SetupRoutes configures API routes
-func (h *ServiceHandler) SetupRoutes(r *gin.Engine) {
+func (h *serviceHandler) SetupRoutes(r *gin.Engine) {
 	// Service status endpoints
 	servicesConfig := h.config.ServicesConfig
 
@@ -36,20 +40,20 @@ func (h *ServiceHandler) SetupRoutes(r *gin.Engine) {
 }
 
 // registerServiceRoute registers a route if the service is enabled
-func (h *ServiceHandler) registerServiceRoute(registerFunc func(string, ...gin.HandlerFunc) gin.IRoutes, path string, enabled bool, handler gin.HandlerFunc) {
+func (h *serviceHandler) registerServiceRoute(registerFunc func(string, ...gin.HandlerFunc) gin.IRoutes, path string, enabled bool, handler gin.HandlerFunc) {
 	if enabled {
 		registerFunc(path, handler)
 	}
 }
 
-func (h *ServiceHandler) getNginxProxyManagerStatus(c *gin.Context) {
+func (h *serviceHandler) getNginxProxyManagerStatus(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"service": "nginx-proxy-manager",
 		"status":  "ok",
 	})
 }
 
-func (h *ServiceHandler) getAdGuardHomeStatus(c *gin.Context) {
+func (h *serviceHandler) getAdGuardHomeStatus(c *gin.Context) {
 	baseConfig := h.config.ServicesConfig.AdGuardHome
 	stats, err := h.adguardService.GetStats(baseConfig.Url, baseConfig.Username, baseConfig.Password)
 	if err != nil {
@@ -61,28 +65,28 @@ func (h *ServiceHandler) getAdGuardHomeStatus(c *gin.Context) {
 	c.JSON(200, stats)
 }
 
-func (h *ServiceHandler) getPortainerStatus(c *gin.Context) {
+func (h *serviceHandler) getPortainerStatus(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"service": "portainer",
 		"status":  "ok",
 	})
 }
 
-func (h *ServiceHandler) getWUDStatus(c *gin.Context) {
+func (h *serviceHandler) getWUDStatus(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"service": "wud",
 		"status":  "ok",
 	})
 }
 
-func (h *ServiceHandler) getGotifyStatus(c *gin.Context) {
+func (h *serviceHandler) getGotifyStatus(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"service": "gotify",
 		"status":  "ok",
 	})
 }
 
-func (h *ServiceHandler) getUptimeKumaStatus(c *gin.Context) {
+func (h *serviceHandler) getUptimeKumaStatus(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"service": "uptime-kuma",
 		"status":  "ok",
