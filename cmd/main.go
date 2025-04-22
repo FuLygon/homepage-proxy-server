@@ -17,9 +17,7 @@ func main() {
 	}
 
 	// Set Gin mode
-	if conf.GinMode == "release" {
-		gin.SetMode(gin.ReleaseMode)
-	}
+	gin.SetMode(conf.GinMode)
 	r := gin.Default()
 
 	// Set trusted proxies
