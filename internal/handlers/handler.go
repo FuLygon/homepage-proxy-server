@@ -45,6 +45,9 @@ func (h *serviceHandler) SetupRoutes(r *gin.Engine) {
 	// Service status endpoints
 	servicesConfig := h.config.ServicesConfig
 
+	// Health check endpoint
+	r.GET("/health", h.healthCheck)
+
 	// Register routes based on service configuration
 	h.registerServiceRoute(r.GET, "/adguard-home", servicesConfig.AdGuardHome.Enabled, h.getAdGuardHomeStatus)
 	h.registerServiceRoute(r.GET, "/nginx-proxy-manager", servicesConfig.NginxProxyManager.Enabled, h.getNginxProxyManagerStatus)
@@ -59,6 +62,12 @@ func (h *serviceHandler) registerServiceRoute(registerFunc func(string, ...gin.H
 	if enabled {
 		registerFunc(path, handler)
 	}
+}
+
+func (h *serviceHandler) healthCheck(c *gin.Context) {
+	c.JSON(200, gin.H{
+		"status": "healthy",
+	})
 }
 
 func (h *serviceHandler) getNginxProxyManagerStatus(c *gin.Context) {
