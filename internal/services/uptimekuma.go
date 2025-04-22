@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"homepage-proxy-server/internal/models"
 	"net/http"
-	"time"
 )
 
 type UptimeKumaService interface {
@@ -18,20 +17,6 @@ func NewUptimeKumaService() UptimeKumaService {
 	return &uptimeKumaService{}
 }
 func (s *uptimeKumaService) GetStats(baseUrl, slug string) (*models.UptimeKumaResponse, error) {
-	// Get status page data
-	statusURL := fmt.Sprintf("%s/api/status-page/%s", baseUrl, slug)
-	statusResp, err := http.Get(statusURL)
-	if err != nil {
-		return nil, fmt.Errorf("failed to fetch status page: %w", err)
-	}
-	defer statusResp.Body.Close()
-
-	// Parse status page response
-	var statusData models.UptimeKumaStatusPageStats
-	if err := json.NewDecoder(statusResp.Body).Decode(&statusData); err != nil {
-		return nil, fmt.Errorf("failed to decode status page response: %w", err)
-	}
-
 	// Get heartbeat data
 	heartbeatURL := fmt.Sprintf("%s/api/status-page/heartbeat/%s", baseUrl, slug)
 	heartbeatResp, err := http.Get(heartbeatURL)
@@ -65,15 +50,6 @@ func (s *uptimeKumaService) GetStats(baseUrl, slug string) (*models.UptimeKumaRe
 			sum += uptime
 		}
 		response.Uptime = (sum / float64(len(heartbeatData.UptimeList))) * 100
-	}
-
-	// Calculate incident time
-	if statusData.Incident != nil {
-		createdDate, err := time.Parse(time.RFC3339, statusData.Incident.CreatedDate)
-		if err == nil {
-			incidentHours := int(time.Since(createdDate).Hours())
-			response.IncidentTime = &incidentHours
-		}
 	}
 
 	return response, nil
