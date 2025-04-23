@@ -14,7 +14,7 @@ const npmAuthTokenCacheKey = "npm_auth_token"
 const npmAuthTokenExpiry = "npm_auth_expiry"
 
 type NPMService interface {
-	GetStats(baseUrl, authToken string) (*[]models.NPMResponse, error)
+	GetStats(baseUrl, authToken string) (*[]models.NPMStatsResponse, error)
 	Login(baseUrl, username, password string) (*models.NPMAuthResponse, error)
 }
 
@@ -33,7 +33,7 @@ func NewNPMService(cache cache.Cache) NPMService {
 }
 
 // GetStats implement from https://github.com/gethomepage/homepage/blob/main/src/widgets/npm/component.jsx
-func (s *npmService) GetStats(baseUrl, authToken string) (*[]models.NPMResponse, error) {
+func (s *npmService) GetStats(baseUrl, authToken string) (*[]models.NPMStatsResponse, error) {
 	// Prepare stats request
 	statsReq, err := http.NewRequest("GET", fmt.Sprintf("%s/api/nginx/proxy-hosts", baseUrl), nil)
 	if err != nil {
@@ -49,7 +49,7 @@ func (s *npmService) GetStats(baseUrl, authToken string) (*[]models.NPMResponse,
 	defer resp.Body.Close()
 
 	// Parse stats response
-	var stats []models.NPMResponse
+	var stats []models.NPMStatsResponse
 	if err = json.NewDecoder(resp.Body).Decode(&stats); err != nil {
 		return nil, fmt.Errorf("failed to parse stats response: %w", err)
 	}

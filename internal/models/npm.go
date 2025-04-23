@@ -14,7 +14,7 @@ type NPMAuthResponse struct {
 	Expires time.Time `json:"expires"`
 }
 
-// NPMResponse minimalized response from NPM API
-type NPMResponse struct {
+// NPMStatsResponse minimalized response from NPM API
+type NPMStatsResponse struct {
 	Enabled bool `json:"enabled"`
 }
