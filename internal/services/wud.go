@@ -3,7 +3,7 @@ package services
 import (
 	"encoding/json"
 	"fmt"
-	"homepage-proxy-server/internal/models"
+	"homepage-widgets-gateway/internal/models"
 	"net/http"
 	"time"
 )

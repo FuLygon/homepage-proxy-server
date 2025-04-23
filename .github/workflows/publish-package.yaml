@@ -6,7 +6,7 @@ on:
       - '*'
 
 env:
-  REGISTRY_IMAGE: ghcr.io/fulygon/homepage-proxy-server
+  REGISTRY_IMAGE: ghcr.io/fulygon/homepage-widgets-gateway
 
 jobs:
   build:

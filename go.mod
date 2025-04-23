@@ -1,4 +1,4 @@
-module homepage-proxy-server
+module homepage-widgets-gateway
 
 go 1.24.0
 

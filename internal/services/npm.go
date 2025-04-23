@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"homepage-proxy-server/internal/cache"
-	"homepage-proxy-server/internal/models"
+	"homepage-widgets-gateway/internal/cache"
+	"homepage-widgets-gateway/internal/models"
 	"net/http"
 	"time"
 )

@@ -2,10 +2,10 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
-	"homepage-proxy-server/config"
-	"homepage-proxy-server/internal/cache"
-	"homepage-proxy-server/internal/handlers"
-	"homepage-proxy-server/internal/services"
+	"homepage-widgets-gateway/config"
+	"homepage-widgets-gateway/internal/cache"
+	"homepage-widgets-gateway/internal/handlers"
+	"homepage-widgets-gateway/internal/services"
 	"log"
 )
 

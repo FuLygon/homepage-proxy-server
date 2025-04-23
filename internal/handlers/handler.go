@@ -2,8 +2,8 @@ package handlers
 
 import (
 	"github.com/gin-gonic/gin"
-	"homepage-proxy-server/config"
-	"homepage-proxy-server/internal/services"
+	"homepage-widgets-gateway/config"
+	"homepage-widgets-gateway/internal/services"
 )
 
 type ServiceHandler interface {
