@@ -1,16 +1,16 @@
 package models
 
-// UptimeKumaHeartbeatStats response from Uptime Kuma heartbeat page
-type UptimeKumaHeartbeatStats struct {
+// UptimeKumaStatsResponse minimalized response from Uptime Kuma staus page API
+type UptimeKumaStatsResponse struct {
+	Incident *struct {
+		CreatedDate string `json:"createdDate"`
+	} `json:"incident,omitempty"`
+}
+
+// UptimeKumaStatsHeartbeatResponse minimalized response from Uptime Kuma staus page heartbeat API
+type UptimeKumaStatsHeartbeatResponse struct {
 	HeartbeatList map[string][]struct {
 		Status int `json:"status"`
 	} `json:"heartbeatList"`
 	UptimeList map[string]float64 `json:"uptimeList"`
-}
-
-// UptimeKumaResponse minimalized response from Uptime Kuma
-type UptimeKumaResponse struct {
-	SitesUp   int     `json:"sites-up"`
-	SitesDown int     `json:"sites-down"`
-	Uptime    float64 `json:"uptime"`
 }

@@ -71,7 +71,8 @@ func (r *routes) RegisterRoutes() {
 	r.registerServiceRoute(router.GET, "/gotify", servicesConfig.Gotify.Enabled, r.gotifyHandler.Handle)
 
 	// Uptime Kuma
-	r.registerServiceRoute(router.GET, "/uptime-kuma", servicesConfig.UptimeKuma.Enabled, r.uptimeKumaHandler.Handle)
+	r.registerServiceRoute(router.GET, "/uptime-kuma/api/status-page/:slug", servicesConfig.UptimeKuma.Enabled, r.uptimeKumaHandler.HandleStats)
+	r.registerServiceRoute(router.GET, "/uptime-kuma/api/status-page/heartbeat/:slug", servicesConfig.UptimeKuma.Enabled, r.uptimeKumaHandler.HandleStatsHeartbeat)
 }
 
 // registerServiceRoute registers a route if the service is enabled

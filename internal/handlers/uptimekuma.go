@@ -7,7 +7,8 @@ import (
 )
 
 type UptimeKumaHandler interface {
-	Handle(c *gin.Context)
+	HandleStats(c *gin.Context)
+	HandleStatsHeartbeat(c *gin.Context)
 }
 
 type uptimeKumaHandler struct {
@@ -22,9 +23,39 @@ func NewUptimeKumaHandler(config *config.Config, service services.UptimeKumaServ
 	}
 }
 
-func (h *uptimeKumaHandler) Handle(c *gin.Context) {
+func (h *uptimeKumaHandler) HandleStats(c *gin.Context) {
+	// extract slug param from the Homepage's request
+	reqSlug := c.Param("slug")
+	if reqSlug == "" {
+		c.JSON(400, gin.H{
+			"error": "Missing slug parameter",
+		})
+		return
+	}
+
 	baseConfig := h.config.ServicesConfig.UptimeKuma
-	stats, err := h.service.GetStats(baseConfig.Url, baseConfig.Slug)
+	stats, err := h.service.GetStats(baseConfig.Url, reqSlug)
+	if err != nil {
+		c.JSON(500, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+	c.JSON(200, stats)
+}
+
+func (h *uptimeKumaHandler) HandleStatsHeartbeat(c *gin.Context) {
+	// extract slug param from the Homepage's request
+	reqSlug := c.Param("slug")
+	if reqSlug == "" {
+		c.JSON(400, gin.H{
+			"error": "Missing slug parameter",
+		})
+		return
+	}
+
+	baseConfig := h.config.ServicesConfig.UptimeKuma
+	stats, err := h.service.GetStatsHeartbeat(baseConfig.Url, reqSlug)
 	if err != nil {
 		c.JSON(500, gin.H{
 			"error": err.Error(),
