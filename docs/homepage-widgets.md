@@ -1,126 +1,55 @@
-## Example Custom API widgets configuration for homepage
+## Example widgets configuration for Homepage
 
-For more information on custom API widgets, please see https://gethomepage.dev/widgets/services/customapi
+Check the official Homepage widgets [documentation](https://gethomepage.dev/widgets) if there is any parameter you don't understand.
 
-Currently rewriting some integrations, will update this docs later on.
+There's no need to include widget credentials like password or token since it already configurated in the API Gateway environment variables.
 
-### Adguard Home
+### [Adguard Home](https://gethomepage.dev/widgets/services/adguard-home)
 
 ```yaml
 widget:
-  type: customapi
-  url: http://homepage-proxy-server:8080/adguard-home
-  refreshInterval: 10000
-  method: GET
-  mappings:
-    - field: queries
-      label: queries
-      format: number
-    - field: blocked
-      label: blocked
-      format: number
-    - field: filtered
-      label: filtered
-      format: number
-    - field: latency
-      label: latency
-      format: float
-      suffix: ms
+  type: adguard
+  url: http://homepage-widgets-gateway:8080/adguard-home
 ```
 
-### Nginx Proxy Manager
+### [Nginx Proxy Manager](https://gethomepage.dev/widgets/services/nginx-proxy-manager)
 
 ```yaml
 widget:
-  type: customapi
-  url: http://homepage-proxy-server:8080/nginx-proxy-manager
-  refreshInterval: 10000
-  method: GET
-  mappings:
-    - field: enabled
-      label: enabled
-      format: number
-    - field: disabled
-      label: disabled
-      format: number
-    - field: total
-      label: total
-      format: number
+  type: npm
+  url: http://homepage-widgets-gateway:8080/nginx-proxy-manager
 ```
 
-### Portainer
+### [Portainer](https://gethomepage.dev/widgets/services/portainer)
 
 ```yaml
 widget:
-  type: customapi
-  url: http://homepage-proxy-server:8080/portainer
-  refreshInterval: 10000
-  method: GET
-  mappings:
-    - field: running
-      label: running
-      format: number
-    - field: stopped
-      label: stopped
-      format: number
-    - field: total
-      label: total
-      format: number
+  type: portainer
+  url: http://homepage-widgets-gateway:8080/portainer
+  env: 1
 ```
 
-### WUD (What's Up Docker)
+### [WUD (What's Up Docker)](https://gethomepage.dev/widgets/services/whatsupdocker)
 
 ```yaml
 widget:
-  type: customapi
-  url: http://homepage-proxy-server:8080/wud
-  refreshInterval: 10000
-  method: GET
-  mappings:
-    - field: monitoring
-      label: monitoring
-      format: number
-    - field: updates
-      label: updates
-      format: number
+  type: whatsupdocker
+  url: http://homepage-widgets-gateway:8080/wud
 ```
 
-### Gotify
+### [Gotify](https://gethomepage.dev/widgets/services/gotify)
 
 ```yaml
 widget:
-  type: customapi
-  url: http://homepage-proxy-server:8080/gotify
-  refreshInterval: 10000
-  method: GET
-  mappings:
-    - field: applications
-      label: applications
-      format: number
-    - field: clients
-      label: clients
-      format: number
-    - field: messages
-      label: messages
-      format: number
+  type: gotify
+  url: http://homepage-widgets-gateway:8080/gotify
 ```
 
-### Uptime Kuma
+### [Uptime Kuma](https://gethomepage.dev/widgets/services/uptime-kuma)
 
 ```yaml
 widget:
-  type: customapi
-  url: http://homepage-proxy-server:8080/uptime-kuma
-  refreshInterval: 10000
-  method: GET
-  mappings:
-    - field: sites-up
-      label: sites up
-      format: number
-    - field: sites-down
-      label: sites down
-      format: number
-    - field: uptime
-      label: uptime
-      format: percent
+  type: uptimekuma
+  url: http://homepage-widgets-gateway:8080/uptime-kuma
+  slug: statuspageslug
 ```
