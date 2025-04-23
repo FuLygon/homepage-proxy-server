@@ -31,6 +31,8 @@ func NewNPMService(cache cache.Cache) NPMService {
 		cache: cache,
 	}
 }
+
+// GetStats implement from https://github.com/gethomepage/homepage/blob/main/src/widgets/npm/component.jsx
 func (s *npmService) GetStats(baseUrl, authToken string) (*[]models.NPMResponse, error) {
 	// Prepare stats request
 	statsReq, err := http.NewRequest("GET", fmt.Sprintf("%s/api/nginx/proxy-hosts", baseUrl), nil)
@@ -55,6 +57,7 @@ func (s *npmService) GetStats(baseUrl, authToken string) (*[]models.NPMResponse,
 	return &stats, nil
 }
 
+// Login implement from https://github.com/gethomepage/homepage/blob/main/src/widgets/npm/proxy.js
 func (s *npmService) Login(baseUrl, username, password string) (*models.NPMAuthResponse, error) {
 	var npmAuthResponse models.NPMAuthResponse
 
