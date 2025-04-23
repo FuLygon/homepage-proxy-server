@@ -10,10 +10,12 @@ import (
 	"time"
 )
 
-const npmAuthTokenCacheKey = "npm_token"
+const npmAuthTokenCacheKey = "npm_auth_token"
+const npmAuthTokenExpiry = "npm_auth_expiry"
 
 type NPMService interface {
-	GetStats(baseUrl, username, password string) (*models.NPMResponse, error)
+	GetStats(baseUrl, authToken string) (*[]models.NPMResponse, error)
+	Login(baseUrl, username, password string) (*models.NPMAuthResponse, error)
 }
 
 type npmService struct {
@@ -29,32 +31,13 @@ func NewNPMService(cache cache.Cache) NPMService {
 		cache: cache,
 	}
 }
-func (s *npmService) GetStats(baseUrl, username, password string) (*models.NPMResponse, error) {
-	var npmAuthToken string
-	// Attempt to retrieve auth token from cache
-	npmAuthTokenCache, found := s.cache.Get(npmAuthTokenCacheKey)
-	if found {
-		npmAuthToken = npmAuthTokenCache.(string)
-	} else {
-		// If cache key value not found, get aghSession from login
-		npmAuthTokenResp, ttl, err := s.login(baseUrl, username, password)
-		if err != nil {
-			return nil, fmt.Errorf("failed to login: %w", err)
-		}
-
-		// cache agh_session cookie
-		s.cache.Set(npmAuthTokenCacheKey, npmAuthTokenResp, ttl)
-		npmAuthToken = npmAuthTokenResp
-
-	}
-
+func (s *npmService) GetStats(baseUrl, authToken string) (*[]models.NPMResponse, error) {
 	// Prepare stats request
 	statsReq, err := http.NewRequest("GET", fmt.Sprintf("%s/api/nginx/proxy-hosts", baseUrl), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to prepare stats request: %w", err)
 	}
-
-	statsReq.Header.Add("Authorization", fmt.Sprintf("Bearer %s", npmAuthToken))
+	statsReq.Header.Add("Authorization", authToken)
 
 	// Make stats request
 	resp, err := s.client.Do(statsReq)
@@ -64,60 +47,63 @@ func (s *npmService) GetStats(baseUrl, username, password string) (*models.NPMRe
 	defer resp.Body.Close()
 
 	// Parse stats response
-	var stats []models.NPMProxyHostsStats
+	var stats []models.NPMResponse
 	if err = json.NewDecoder(resp.Body).Decode(&stats); err != nil {
 		return nil, fmt.Errorf("failed to parse stats response: %w", err)
 	}
 
-	response := &models.NPMResponse{
-		Total: len(stats),
-	}
-
-	for _, host := range stats {
-		if host.Enabled {
-			response.Enabled++
-		} else {
-			response.Disabled++
-		}
-	}
-
-	return response, nil
+	return &stats, nil
 }
 
-func (s *npmService) login(baseUrl, username, password string) (string, time.Duration, error) {
-	loginReq := models.NpmAuthRequest{
-		Identity: username,
-		Secret:   password,
+func (s *npmService) Login(baseUrl, username, password string) (*models.NPMAuthResponse, error) {
+	var npmAuthResponse models.NPMAuthResponse
+
+	// Attempt to retrieve auth token and expiry from cache
+	// Notes that Homepage also does caching for auth on their side, but we cache it on our side anyway in case Homepage was restarted
+	npmAuthTokenCache, foundToken := s.cache.Get(npmAuthTokenCacheKey)
+	npmAuthExpiryCache, foundExpiry := s.cache.Get(npmAuthTokenExpiry)
+
+	if foundToken && foundExpiry {
+		npmAuthResponse.Token = npmAuthTokenCache.(string)
+		npmAuthResponse.Expires = npmAuthExpiryCache.(time.Time)
+	} else {
+		loginReq := models.NPMAuthRequest{
+			Identity: username,
+			Secret:   password,
+		}
+
+		// Login request JSON
+		loginJSON, err := json.Marshal(loginReq)
+		if err != nil {
+			return &npmAuthResponse, fmt.Errorf("failed to prepare login request: %w", err)
+		}
+
+		// Prepare login request
+		loginResp, err := s.client.Post(fmt.Sprintf("%s/api/tokens", baseUrl), "application/json", bytes.NewBuffer(loginJSON))
+		if err != nil {
+			return &npmAuthResponse, fmt.Errorf("failed to prepare login request: %w", err)
+		}
+		defer loginResp.Body.Close()
+
+		if loginResp.StatusCode != http.StatusOK {
+			return &npmAuthResponse, fmt.Errorf("login failed with status: %d", loginResp.StatusCode)
+		}
+
+		if err = json.NewDecoder(loginResp.Body).Decode(&npmAuthResponse); err != nil {
+			return &npmAuthResponse, fmt.Errorf("failed to parse login response: %w", err)
+		}
+
+		// Get ttl for cache
+		ttl := time.Until(npmAuthResponse.Expires)
+		if ttl <= 0 {
+			// Default ttl if there is any issue with expiration time
+			ttl = 1 * time.Hour
+		}
+
+		// Cache token and expiry
+		s.cache.Set(npmAuthTokenCacheKey, npmAuthResponse.Token, ttl)
+		s.cache.Set(npmAuthTokenExpiry, npmAuthResponse.Expires, ttl)
 	}
 
-	// Login request JSON
-	loginJSON, err := json.Marshal(loginReq)
-	if err != nil {
-		return "", 0, fmt.Errorf("failed to prepare login request: %w", err)
-	}
-
-	// Prepare login request
-	loginResp, err := s.client.Post(fmt.Sprintf("%s/api/tokens", baseUrl), "application/json", bytes.NewBuffer(loginJSON))
-	if err != nil {
-		return "", 0, fmt.Errorf("failed to prepare login request: %w", err)
-	}
-	defer loginResp.Body.Close()
-
-	if loginResp.StatusCode != http.StatusOK {
-		return "", 0, fmt.Errorf("login failed with status: %d", loginResp.StatusCode)
-	}
-
-	var authResponse models.NpmAuthResponse
-	if err = json.NewDecoder(loginResp.Body).Decode(&authResponse); err != nil {
-		return "", 0, fmt.Errorf("failed to parse login response: %w", err)
-	}
-
-	// Get ttl for cache
-	ttl := time.Until(authResponse.Expires)
-	if ttl <= 0 {
-		// Default ttl if there is any issue with expiration time
-		ttl = 1 * time.Hour
-	}
-
-	return authResponse.Token, ttl, nil
+	return &npmAuthResponse, nil
 }

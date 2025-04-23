@@ -45,22 +45,33 @@ func NewRoutes(
 
 // RegisterRoutes configures API routes
 func (r *routes) RegisterRoutes() {
-	ginRouter := r.router
+	router := r.router
 	// Base services config
 	servicesConfig := r.config.ServicesConfig
 
 	// Health check endpoint
-	ginRouter.GET("/health", func(c *gin.Context) {
+	router.GET("/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{"status": "healthy"})
 	})
 
 	// Adguard Home
-	r.registerServiceRoute(ginRouter.GET, "/adguard-home/control/stats", servicesConfig.AdGuardHome.Enabled, r.adguardHandler.Handle)
-	r.registerServiceRoute(ginRouter.GET, "/nginx-proxy-manager", servicesConfig.NginxProxyManager.Enabled, r.npmHandler.Handle)
-	r.registerServiceRoute(ginRouter.GET, "/portainer", servicesConfig.Portainer.Enabled, r.portainerHandler.Handle)
-	r.registerServiceRoute(ginRouter.GET, "/wud", servicesConfig.WUD.Enabled, r.wudHandler.Handle)
-	r.registerServiceRoute(ginRouter.GET, "/gotify", servicesConfig.Gotify.Enabled, r.gotifyHandler.Handle)
-	r.registerServiceRoute(ginRouter.GET, "/uptime-kuma", servicesConfig.UptimeKuma.Enabled, r.uptimeKumaHandler.Handle)
+	r.registerServiceRoute(router.GET, "/adguard-home/control/stats", servicesConfig.AdGuardHome.Enabled, r.adguardHandler.Handle)
+
+	// Nginx Proxy Manager
+	r.registerServiceRoute(router.POST, "/nginx-proxy-manager/api/tokens", servicesConfig.NginxProxyManager.Enabled, r.npmHandler.HandleLogin)
+	r.registerServiceRoute(router.GET, "/nginx-proxy-manager/api/nginx/proxy-hosts", servicesConfig.NginxProxyManager.Enabled, r.npmHandler.HandleStats)
+
+	// Portainer
+	r.registerServiceRoute(router.GET, "/portainer", servicesConfig.Portainer.Enabled, r.portainerHandler.Handle)
+
+	// WUD (What's Up Docker)
+	r.registerServiceRoute(router.GET, "/wud", servicesConfig.WUD.Enabled, r.wudHandler.Handle)
+
+	// Gotify
+	r.registerServiceRoute(router.GET, "/gotify", servicesConfig.Gotify.Enabled, r.gotifyHandler.Handle)
+
+	// Uptime Kuma
+	r.registerServiceRoute(router.GET, "/uptime-kuma", servicesConfig.UptimeKuma.Enabled, r.uptimeKumaHandler.Handle)
 }
 
 // registerServiceRoute registers a route if the service is enabled
