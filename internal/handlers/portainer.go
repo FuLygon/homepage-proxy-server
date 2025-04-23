@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"homepage-widgets-gateway/config"
 	"homepage-widgets-gateway/internal/services"
+	"strconv"
 )
 
 type PortainerHandler interface {
@@ -23,8 +24,25 @@ func NewPortainerHandler(config *config.Config, service services.PortainerServic
 }
 
 func (h *portainerHandler) Handle(c *gin.Context) {
+	// extract env param from the Homepage's request
+	reqEnvStr := c.Param("env")
+	if reqEnvStr == "" {
+		c.JSON(400, gin.H{
+			"error": "Missing env parameter",
+		})
+		return
+	}
+
+	reqEnv, err := strconv.Atoi(reqEnvStr)
+	if err != nil {
+		c.JSON(400, gin.H{
+			"error": "Invalid env parameter",
+		})
+		return
+	}
+
 	baseConfig := h.config.ServicesConfig.Portainer
-	stats, err := h.service.GetStats(baseConfig.Url, baseConfig.Key, baseConfig.Env)
+	stats, err := h.service.GetStats(baseConfig.Url, baseConfig.Key, reqEnv)
 	if err != nil {
 		c.JSON(500, gin.H{
 			"error": err.Error(),

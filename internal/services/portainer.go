@@ -9,7 +9,7 @@ import (
 )
 
 type PortainerService interface {
-	GetStats(baseUrl, key string, env int) (*models.PortainerResponse, error)
+	GetStats(baseUrl, key string, env int) (*[]models.PortainerResponse, error)
 }
 
 type portainerService struct {
@@ -23,9 +23,12 @@ func NewPortainerService() PortainerService {
 		},
 	}
 }
-func (s *portainerService) GetStats(baseUrl, key string, env int) (*models.PortainerResponse, error) {
+
+// GetStats implement from https://github.com/gethomepage/homepage/blob/dev/src/widgets/portainer/component.jsx
+func (s *portainerService) GetStats(baseUrl, key string, env int) (*[]models.PortainerResponse, error) {
 	// Prepare stats request
-	statsReq, err := http.NewRequest("GET", fmt.Sprintf("%s/api/endpoints/%d/docker/containers/json?all=true", baseUrl, env), nil)
+	// Hardcoded query param all=1 instead of taking it from the request
+	statsReq, err := http.NewRequest("GET", fmt.Sprintf("%s/api/endpoints/%d/docker/containers/json?all=1", baseUrl, env), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to prepare stats request: %w", err)
 	}
@@ -40,23 +43,10 @@ func (s *portainerService) GetStats(baseUrl, key string, env int) (*models.Porta
 	defer resp.Body.Close()
 
 	// Parse stats response
-	var stats []models.PortainerStats
-	if err = json.NewDecoder(resp.Body).Decode(&stats); err != nil {
+	var response []models.PortainerResponse
+	if err = json.NewDecoder(resp.Body).Decode(&response); err != nil {
 		return nil, fmt.Errorf("failed to parse stats response: %w", err)
 	}
 
-	response := &models.PortainerResponse{
-		Total: len(stats),
-	}
-
-	for _, container := range stats {
-		switch container.State {
-		case "running":
-			response.Running++
-		case "exited", "dead":
-			response.Stopped++
-		}
-	}
-
-	return response, nil
+	return &response, nil
 }
