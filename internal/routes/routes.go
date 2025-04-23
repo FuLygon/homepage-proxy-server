@@ -65,7 +65,7 @@ func (r *routes) RegisterRoutes() {
 	r.registerServiceRoute(router.GET, "/portainer/api/endpoints/:env/docker/containers/json", servicesConfig.Portainer.Enabled, r.portainerHandler.Handle)
 
 	// WUD (What's Up Docker)
-	r.registerServiceRoute(router.GET, "/wud", servicesConfig.WUD.Enabled, r.wudHandler.Handle)
+	r.registerServiceRoute(router.GET, "/wud/api/containers", servicesConfig.WUD.Enabled, r.wudHandler.Handle)
 
 	// Gotify
 	r.registerServiceRoute(router.GET, "/gotify", servicesConfig.Gotify.Enabled, r.gotifyHandler.Handle)

@@ -9,7 +9,7 @@ import (
 )
 
 type WUDService interface {
-	GetStats(baseUrl, username, password string) (*models.WUDResponse, error)
+	GetStats(baseUrl, username, password string) (*[]models.WUDResponse, error)
 }
 
 type wudService struct {
@@ -23,7 +23,9 @@ func NewWUDService() WUDService {
 		},
 	}
 }
-func (s *wudService) GetStats(baseUrl, username, password string) (*models.WUDResponse, error) {
+
+// GetStats implement from https://github.com/gethomepage/homepage/blob/main/src/widgets/whatsupdocker/component.jsx
+func (s *wudService) GetStats(baseUrl, username, password string) (*[]models.WUDResponse, error) {
 	// Prepare stats request
 	statsReq, err := http.NewRequest("GET", fmt.Sprintf("%s/api/containers", baseUrl), nil)
 	if err != nil {
@@ -39,20 +41,10 @@ func (s *wudService) GetStats(baseUrl, username, password string) (*models.WUDRe
 	defer resp.Body.Close()
 
 	// Parse stats response
-	var stats []models.WUDStats
-	if err := json.NewDecoder(resp.Body).Decode(&stats); err != nil {
+	var response []models.WUDResponse
+	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
 		return nil, fmt.Errorf("failed to parse stats response: %w", err)
 	}
 
-	response := &models.WUDResponse{
-		Monitoring: len(stats),
-	}
-
-	for _, container := range stats {
-		if container.UpdateAvailable {
-			response.Updates++
-		}
-	}
-
-	return response, nil
+	return &response, nil
 }
