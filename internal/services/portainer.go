@@ -24,7 +24,7 @@ func NewPortainerService() PortainerService {
 	}
 }
 
-// GetStats implement from https://github.com/gethomepage/homepage/blob/dev/src/widgets/portainer/component.jsx
+// GetStats implement from https://github.com/gethomepage/homepage/blob/main/src/widgets/portainer/component.jsx
 func (s *portainerService) GetStats(baseUrl, key string, env int) (*[]models.PortainerResponse, error) {
 	// Prepare stats request
 	// Hardcoded query param all=1 instead of taking it from the request
