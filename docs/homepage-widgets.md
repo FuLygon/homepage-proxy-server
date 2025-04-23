@@ -2,6 +2,8 @@
 
 For more information on custom API widgets, please see https://gethomepage.dev/widgets/services/customapi
 
+Currently rewriting some integrations, will update this docs later on.
+
 ### Adguard Home
 
 ```yaml
