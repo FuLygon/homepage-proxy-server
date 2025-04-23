@@ -18,11 +18,11 @@ This API Gateway will minimize the amount the data responded that Homepage neede
 
 ## How it works
 
-Fairly simple, Homepage will make an API request of a specific integration via this API Gateway instead of directly into the target service. This API Gateway then makes a request to the target service to fetch the data, similar to how the existing Homepage integrations work, but it will process the response and only return the data needed by the Homepage. This way, no unnecessary data will be exposed to the public.
+Fairly simple, Homepage will make an API request of a specific integration via this API Gateway instead of directly into the target service. This API Gateway then makes a request to the target service to fetch the data, similar to how the existing Homepage integrations work, but it will process the response and only return the data needed back to Homepage. This way, no unnecessary data will be exposed to the public.
 
 Most of the integrations and mapping will be using existing implementation from [source code](https://github.com/gethomepage/homepage/tree/dev/src/widgets) by Homepage as a reference to process the data.
 
-If it's not possible to map the responding data for Homepage integration, then [Custom API](https://gethomepage.dev/widgets/services/customapi) will be used as a fallback method for integrating. This will also be used to some implement integrations that Homepage doesn't support. Since I _might_ as well using this repo to implement other integrations that I need but aren't supported by Homepage.
+If it's not possible to map the responding data for Homepage integration, then [Custom API](https://gethomepage.dev/widgets/services/customapi) will be used as a fallback method for integrating. I _might_ as well use it to implement other integrations that I need but aren't supported by Homepage.
 
 ## Supported Integrations
 
@@ -94,4 +94,4 @@ go build -o homepage-widgets-gateway ./cmd/main.go
 
 An example Homepage widgets configuration with the API Gateway can be found [here](docs/homepage-widgets.md).
 
-Note that the API Gateway is not meant to be accessed publicly, only accessible by Homepage proxy. So make sure to configure your network settings (port mapping, firewall rules, ...)
+Note that the API Gateway is not meant to be accessed **publicly**, only accessible by Homepage proxy. So make sure to configure your network settings (port mapping, firewall rules, ...). Also enable Homepage `hideErrors` to [disable widget error messages](https://gethomepage.dev/configs/settings/#hide-widget-error-messages), unless you are debugging.
