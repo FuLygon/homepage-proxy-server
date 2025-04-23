@@ -46,7 +46,6 @@ type ServicesConfig struct {
 	UptimeKuma struct {
 		Enabled bool   `env:"SERVICE_UPTIME_KUMA_ENABLED" envDefault:"false"`
 		Url     string `env:"SERVICE_UPTIME_KUMA_URL"`
-		Slug    string `env:"SERVICE_UPTIME_KUMA_SLUG"`
 	}
 }
 
@@ -106,7 +105,7 @@ func validateServicesConfig(cfg *Config) error {
 
 	// Validate Uptime Kuma
 	if config := cfg.UptimeKuma; config.Enabled {
-		if config.Url == "" || config.Slug == "" {
+		if config.Url == "" {
 			return fmt.Errorf("missing configuration for Uptime Kuma")
 		}
 	}
