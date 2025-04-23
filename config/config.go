@@ -30,7 +30,6 @@ type ServicesConfig struct {
 	Portainer struct {
 		Enabled bool   `env:"SERVICE_PORTAINER_ENABLED" envDefault:"false"`
 		Url     string `env:"SERVICE_PORTAINER_URL"`
-		Env     int    `env:"SERVICE_PORTAINER_ENV"`
 		Key     string `env:"SERVICE_PORTAINER_KEY"`
 	}
 	WUD struct {
@@ -86,7 +85,7 @@ func validateServicesConfig(cfg *Config) error {
 
 	// Validate Portainer
 	if config := cfg.Portainer; config.Enabled {
-		if config.Url == "" || config.Env <= 0 || config.Key == "" {
+		if config.Url == "" || config.Key == "" {
 			return fmt.Errorf("missing configuration for Portainer")
 		}
 	}
