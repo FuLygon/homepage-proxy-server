@@ -5,6 +5,7 @@ import (
 	"homepage-widgets-gateway/config"
 	"homepage-widgets-gateway/internal/cache"
 	"homepage-widgets-gateway/internal/handlers"
+	"homepage-widgets-gateway/internal/routes"
 	"homepage-widgets-gateway/internal/services"
 	"log"
 )
@@ -18,11 +19,11 @@ func main() {
 
 	// Set Gin mode
 	gin.SetMode(conf.GinMode)
-	r := gin.Default()
+	router := gin.Default()
 
 	// Set trusted proxies
 	if len(conf.TrustedProxies) > 0 {
-		err = r.SetTrustedProxies(conf.TrustedProxies)
+		err = router.SetTrustedProxies(conf.TrustedProxies)
 		if err != nil {
 			log.Printf("error setting trusted proxies: %v", err)
 		}
@@ -40,11 +41,30 @@ func main() {
 	uptimeKumaService := services.NewUptimeKumaService()
 
 	// Setup handlers
-	handler := handlers.NewServiceHandler(conf, adguardService, npmService, portainerService, wudService, gotifyService, uptimeKumaService)
-	handler.SetupRoutes(r)
+	adguardHandler := handlers.NewAdGuardHandler(conf, adguardService)
+	npmHandler := handlers.NewNPMHandler(conf, npmService)
+	portainerHandler := handlers.NewPortainerHandler(conf, portainerService)
+	wudHandler := handlers.NewWUDHandler(conf, wudService)
+	gotifyHandler := handlers.NewGotifyHandler(conf, gotifyService)
+	uptimeKumaHandler := handlers.NewUptimeKumaHandler(conf, uptimeKumaService)
+
+	// Setup routes
+	r := routes.NewRoutes(
+		router,
+		conf,
+		adguardHandler,
+		npmHandler,
+		portainerHandler,
+		wudHandler,
+		gotifyHandler,
+		uptimeKumaHandler,
+	)
+
+	// Register routes
+	r.RegisterRoutes()
 
 	// Start server
-	if err = r.Run(":" + conf.Port); err != nil {
+	if err = router.Run(":" + conf.Port); err != nil {
 		log.Fatal("failed to start server: ", err)
 	}
 }
