@@ -11,7 +11,9 @@ import (
 )
 
 type GotifyService interface {
-	GetStats(baseUrl, key string) (*models.GotifyResponse, error)
+	GetMessages(baseUrl, key string) (map[string]interface{}, error)
+	GetApplications(baseUrl, key string) (interface{}, error)
+	GetClients(baseUrl, key string) (interface{}, error)
 }
 
 type gotifyService struct {
@@ -25,49 +27,15 @@ func NewGotifyService() GotifyService {
 		},
 	}
 }
-func (s *gotifyService) GetStats(baseUrl, key string) (*models.GotifyResponse, error) {
-	totalApplications, err := s.getTotalApplications(baseUrl, key)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get total applications: %w", err)
-	}
 
-	totalClients, err := s.getTotalClients(baseUrl, key)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get total clients: %w", err)
-	}
+type dummy struct{}
 
-	var (
-		totalMessages int
-		offset        int
-	)
-	for {
-		size, since, err := s.getMessages(baseUrl, key, offset)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get total messages: %w", err)
-		}
-
-		totalMessages += size
-		if since == 0 {
-			break
-		} else {
-			offset = since
-		}
-	}
-
-	response := &models.GotifyResponse{
-		Applications: totalApplications,
-		Clients:      totalClients,
-		Messages:     totalMessages,
-	}
-
-	return response, nil
-}
-
-func (s *gotifyService) getTotalApplications(baseUrl, key string) (int, error) {
+// GetApplications implement from https://github.com/gethomepage/homepage/blob/main/src/widgets/gotify/component.jsx
+func (s *gotifyService) GetApplications(baseUrl, key string) (interface{}, error) {
 	// Prepare stats request
 	applicationStatsReq, err := http.NewRequest("GET", fmt.Sprintf("%s/application", baseUrl), nil)
 	if err != nil {
-		return 0, fmt.Errorf("failed to prepare application stats request: %w", err)
+		return nil, fmt.Errorf("failed to prepare application stats request: %w", err)
 	}
 
 	applicationStatsReq.Header.Add("X-Gotify-Key", key)
@@ -75,20 +43,23 @@ func (s *gotifyService) getTotalApplications(baseUrl, key string) (int, error) {
 	// Make stats request
 	resp, err := s.client.Do(applicationStatsReq)
 	if err != nil {
-		return 0, fmt.Errorf("failed to fetch application stats: %w", err)
+		return nil, fmt.Errorf("failed to fetch application stats: %w", err)
 	}
 	defer resp.Body.Close()
 
 	// Parse stats response
 	var applicationsStats []map[string]interface{}
 	if err = json.NewDecoder(resp.Body).Decode(&applicationsStats); err != nil {
-		return 0, fmt.Errorf("failed to parse application stats response: %w", err)
+		return nil, fmt.Errorf("failed to parse application stats response: %w", err)
 	}
 
-	return len(applicationsStats), nil
+	// Create a fake response with the same length as applicationsStats
+	response := make([]dummy, len(applicationsStats))
+	return response, nil
 }
 
-func (s *gotifyService) getTotalClients(baseUrl, key string) (int, error) {
+// GetClients implement from https://github.com/gethomepage/homepage/blob/main/src/widgets/gotify/component.jsx
+func (s *gotifyService) GetClients(baseUrl, key string) (interface{}, error) {
 	// Prepare stats request
 	clientStatsReq, err := http.NewRequest("GET", fmt.Sprintf("%s/client", baseUrl), nil)
 	if err != nil {
@@ -110,40 +81,69 @@ func (s *gotifyService) getTotalClients(baseUrl, key string) (int, error) {
 		return 0, fmt.Errorf("failed to parse client stats response: %w", err)
 	}
 
-	return len(clientsStats), nil
+	// Create a fake response with the same length as clientsStats
+	response := make([]dummy, len(clientsStats))
+	return response, nil
 }
 
-func (s *gotifyService) getMessages(baseUrl, key string, since int) (int, int, error) {
-	// Prepare stats request
-	reqUrl, err := url.Parse(fmt.Sprintf("%s/message", baseUrl))
-	if err != nil {
-		log.Fatal(err)
+// GetMessages partially implement from https://github.com/gethomepage/homepage/blob/main/src/widgets/gotify/component.jsx
+// Because the current implementation by Homepage has an issue where messages are capped at 100
+func (s *gotifyService) GetMessages(baseUrl, key string) (map[string]interface{}, error) {
+	var (
+		totalMessages int
+		offset        int
+	)
+	for {
+		size, since, err := func() (int, int, error) {
+			// Prepare stats request
+			reqUrl, err := url.Parse(fmt.Sprintf("%s/message", baseUrl))
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			queryParams := reqUrl.Query()
+			queryParams.Set("limit", "200") // Limitation by Gotify API
+			queryParams.Set("since", fmt.Sprintf("%d", offset))
+			reqUrl.RawQuery = queryParams.Encode()
+
+			clientStatsReq, err := http.NewRequest("GET", reqUrl.String(), nil)
+			if err != nil {
+				return 0, 0, fmt.Errorf("failed to prepare message stats request: %w", err)
+			}
+
+			clientStatsReq.Header.Add("X-Gotify-Key", key)
+
+			// Make stats request
+			resp, err := s.client.Do(clientStatsReq)
+			if err != nil {
+				return 0, 0, fmt.Errorf("failed to fetch message stats: %w", err)
+			}
+			defer resp.Body.Close()
+
+			// Parse stats response
+			var messageStats models.GotifyMessageStats
+			if err = json.NewDecoder(resp.Body).Decode(&messageStats); err != nil {
+				return 0, 0, fmt.Errorf("failed to parse message stats response: %w", err)
+			}
+
+			return messageStats.Paging.Size, messageStats.Paging.Since, nil
+		}()
+		if err != nil {
+			return nil, fmt.Errorf("failed to get total messages: %w", err)
+		}
+
+		totalMessages += size
+		if since == 0 {
+			break
+		} else {
+			offset = since
+		}
 	}
 
-	queryParams := reqUrl.Query()
-	queryParams.Set("limit", "200")
-	queryParams.Set("since", fmt.Sprintf("%d", since))
-	reqUrl.RawQuery = queryParams.Encode()
+	// Create a fake response with the same length as totalMessages
+	messages := make([]dummy, totalMessages)
+	response := make(map[string]interface{})
+	response["messages"] = messages
 
-	clientStatsReq, err := http.NewRequest("GET", reqUrl.String(), nil)
-	if err != nil {
-		return 0, 0, fmt.Errorf("failed to prepare message stats request: %w", err)
-	}
-
-	clientStatsReq.Header.Add("X-Gotify-Key", key)
-
-	// Make stats request
-	resp, err := s.client.Do(clientStatsReq)
-	if err != nil {
-		return 0, 0, fmt.Errorf("failed to fetch message stats: %w", err)
-	}
-	defer resp.Body.Close()
-
-	// Parse stats response
-	var messageStats models.GotifyMessageStats
-	if err = json.NewDecoder(resp.Body).Decode(&messageStats); err != nil {
-		return 0, 0, fmt.Errorf("failed to parse message stats response: %w", err)
-	}
-
-	return messageStats.Paging.Size, messageStats.Paging.Since, nil
+	return response, nil
 }

@@ -54,23 +54,25 @@ func (r *routes) RegisterRoutes() {
 		c.JSON(200, gin.H{"status": "healthy"})
 	})
 
-	// Adguard Home
+	// Adguard Home - endpoint references from: https://github.com/gethomepage/homepage/blob/main/src/widgets/adguard/widget.js
 	r.registerServiceRoute(router.GET, "/adguard-home/control/stats", servicesConfig.AdGuardHome.Enabled, r.adguardHandler.Handle)
 
-	// Nginx Proxy Manager
+	// Nginx Proxy Manager - endpoints references from: https://github.com/gethomepage/homepage/blob/main/src/widgets/npm/widget.js
 	r.registerServiceRoute(router.POST, "/nginx-proxy-manager/api/tokens", servicesConfig.NginxProxyManager.Enabled, r.npmHandler.HandleLogin)
 	r.registerServiceRoute(router.GET, "/nginx-proxy-manager/api/nginx/proxy-hosts", servicesConfig.NginxProxyManager.Enabled, r.npmHandler.HandleStats)
 
-	// Portainer
+	// Portainer - endpoint references from: https://github.com/gethomepage/homepage/blob/main/src/widgets/portainer/widget.js
 	r.registerServiceRoute(router.GET, "/portainer/api/endpoints/:env/docker/containers/json", servicesConfig.Portainer.Enabled, r.portainerHandler.Handle)
 
-	// WUD (What's Up Docker)
+	// WUD (What's Up Docker) - endpoint references from: https://github.com/gethomepage/homepage/blob/main/src/widgets/whatsupdocker/widget.js
 	r.registerServiceRoute(router.GET, "/wud/api/containers", servicesConfig.WUD.Enabled, r.wudHandler.Handle)
 
-	// Gotify
-	r.registerServiceRoute(router.GET, "/gotify", servicesConfig.Gotify.Enabled, r.gotifyHandler.Handle)
+	// Gotify - endpoints references from: https://github.com/gethomepage/homepage/blob/main/src/widgets/gotify/widget.js
+	r.registerServiceRoute(router.GET, "/gotify/application", servicesConfig.Gotify.Enabled, r.gotifyHandler.HandleApplication)
+	r.registerServiceRoute(router.GET, "/gotify/client", servicesConfig.Gotify.Enabled, r.gotifyHandler.HandleClient)
+	r.registerServiceRoute(router.GET, "/gotify/message", servicesConfig.Gotify.Enabled, r.gotifyHandler.HandleMessage)
 
-	// Uptime Kuma
+	// Uptime Kuma - endpoints references from: https://github.com/gethomepage/homepage/blob/main/src/widgets/uptimekuma/widget.js
 	r.registerServiceRoute(router.GET, "/uptime-kuma/api/status-page/:slug", servicesConfig.UptimeKuma.Enabled, r.uptimeKumaHandler.HandleStats)
 	r.registerServiceRoute(router.GET, "/uptime-kuma/api/status-page/heartbeat/:slug", servicesConfig.UptimeKuma.Enabled, r.uptimeKumaHandler.HandleStatsHeartbeat)
 }

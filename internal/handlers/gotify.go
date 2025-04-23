@@ -7,7 +7,9 @@ import (
 )
 
 type GotifyHandler interface {
-	Handle(c *gin.Context)
+	HandleApplication(c *gin.Context)
+	HandleClient(c *gin.Context)
+	HandleMessage(c *gin.Context)
 }
 
 type gotifyHandler struct {
@@ -22,9 +24,33 @@ func NewGotifyHandler(config *config.Config, service services.GotifyService) Got
 	}
 }
 
-func (h *gotifyHandler) Handle(c *gin.Context) {
+func (h *gotifyHandler) HandleApplication(c *gin.Context) {
 	baseConfig := h.config.ServicesConfig.Gotify
-	stats, err := h.service.GetStats(baseConfig.Url, baseConfig.Key)
+	stats, err := h.service.GetApplications(baseConfig.Url, baseConfig.Key)
+	if err != nil {
+		c.JSON(500, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+	c.JSON(200, stats)
+}
+
+func (h *gotifyHandler) HandleClient(c *gin.Context) {
+	baseConfig := h.config.ServicesConfig.Gotify
+	stats, err := h.service.GetClients(baseConfig.Url, baseConfig.Key)
+	if err != nil {
+		c.JSON(500, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+	c.JSON(200, stats)
+}
+
+func (h *gotifyHandler) HandleMessage(c *gin.Context) {
+	baseConfig := h.config.ServicesConfig.Gotify
+	stats, err := h.service.GetMessages(baseConfig.Url, baseConfig.Key)
 	if err != nil {
 		c.JSON(500, gin.H{
 			"error": err.Error(),
