@@ -24,6 +24,7 @@ func NewAdGuardHomeService() AdGuardHomeService {
 	}
 }
 
+// GetStats implement from https://github.com/gethomepage/homepage/blob/main/src/widgets/adguard/component.jsx
 func (s *adGuardHomeService) GetStats(baseUrl, username, password string) (*models.AdguardHomeStatsResponse, error) {
 	// Prepare stats request
 	statsReq, err := http.NewRequest("GET", fmt.Sprintf("%s/control/stats", baseUrl), nil)
