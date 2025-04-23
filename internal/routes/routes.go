@@ -13,23 +13,23 @@ type Routes interface {
 type routes struct {
 	router            *gin.Engine
 	config            *config.Config
-	adguardHandler    *handlers.AdGuardHandler
-	npmHandler        *handlers.NPMHandler
-	portainerHandler  *handlers.PortainerHandler
-	wudHandler        *handlers.WUDHandler
-	gotifyHandler     *handlers.GotifyHandler
-	uptimeKumaHandler *handlers.UptimeKumaHandler
+	adguardHandler    handlers.AdGuardHandler
+	npmHandler        handlers.NPMHandler
+	portainerHandler  handlers.PortainerHandler
+	wudHandler        handlers.WUDHandler
+	gotifyHandler     handlers.GotifyHandler
+	uptimeKumaHandler handlers.UptimeKumaHandler
 }
 
 func NewRoutes(
 	router *gin.Engine,
 	config *config.Config,
-	adguardHandler *handlers.AdGuardHandler,
-	npmHandler *handlers.NPMHandler,
-	portainerHandler *handlers.PortainerHandler,
-	wudHandler *handlers.WUDHandler,
-	gotifyHandler *handlers.GotifyHandler,
-	uptimeKumaHandler *handlers.UptimeKumaHandler,
+	adguardHandler handlers.AdGuardHandler,
+	npmHandler handlers.NPMHandler,
+	portainerHandler handlers.PortainerHandler,
+	wudHandler handlers.WUDHandler,
+	gotifyHandler handlers.GotifyHandler,
+	uptimeKumaHandler handlers.UptimeKumaHandler,
 ) Routes {
 	return &routes{
 		router:            router,

@@ -6,19 +6,23 @@ import (
 	"homepage-widgets-gateway/internal/services"
 )
 
-type WUDHandler struct {
+type WUDHandler interface {
+	Handle(c *gin.Context)
+}
+
+type wudHandler struct {
 	config  *config.Config
 	service services.WUDService
 }
 
-func NewWUDHandler(config *config.Config, service services.WUDService) *WUDHandler {
-	return &WUDHandler{
+func NewWUDHandler(config *config.Config, service services.WUDService) WUDHandler {
+	return &wudHandler{
 		config:  config,
 		service: service,
 	}
 }
 
-func (h *WUDHandler) Handle(c *gin.Context) {
+func (h *wudHandler) Handle(c *gin.Context) {
 	baseConfig := h.config.ServicesConfig.WUD
 	stats, err := h.service.GetStats(baseConfig.Url, baseConfig.Username, baseConfig.Password)
 	if err != nil {

@@ -6,19 +6,23 @@ import (
 	"homepage-widgets-gateway/internal/services"
 )
 
-type UptimeKumaHandler struct {
+type UptimeKumaHandler interface {
+	Handle(c *gin.Context)
+}
+
+type uptimeKumaHandler struct {
 	config  *config.Config
 	service services.UptimeKumaService
 }
 
-func NewUptimeKumaHandler(config *config.Config, service services.UptimeKumaService) *UptimeKumaHandler {
-	return &UptimeKumaHandler{
+func NewUptimeKumaHandler(config *config.Config, service services.UptimeKumaService) UptimeKumaHandler {
+	return &uptimeKumaHandler{
 		config:  config,
 		service: service,
 	}
 }
 
-func (h *UptimeKumaHandler) Handle(c *gin.Context) {
+func (h *uptimeKumaHandler) Handle(c *gin.Context) {
 	baseConfig := h.config.ServicesConfig.UptimeKuma
 	stats, err := h.service.GetStats(baseConfig.Url, baseConfig.Slug)
 	if err != nil {

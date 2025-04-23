@@ -6,19 +6,23 @@ import (
 	"homepage-widgets-gateway/internal/services"
 )
 
-type PortainerHandler struct {
+type PortainerHandler interface {
+	Handle(c *gin.Context)
+}
+
+type portainerHandler struct {
 	config  *config.Config
 	service services.PortainerService
 }
 
-func NewPortainerHandler(config *config.Config, service services.PortainerService) *PortainerHandler {
-	return &PortainerHandler{
+func NewPortainerHandler(config *config.Config, service services.PortainerService) PortainerHandler {
+	return &portainerHandler{
 		config:  config,
 		service: service,
 	}
 }
 
-func (h *PortainerHandler) Handle(c *gin.Context) {
+func (h *portainerHandler) Handle(c *gin.Context) {
 	baseConfig := h.config.ServicesConfig.Portainer
 	stats, err := h.service.GetStats(baseConfig.Url, baseConfig.Key, baseConfig.Env)
 	if err != nil {
