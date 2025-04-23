@@ -1,15 +1,7 @@
 package models
 
-// AdGuardHomeResponse Adguard Home API after processing
-type AdGuardHomeResponse struct {
-	Queries  int     `json:"queries"`
-	Blocked  int     `json:"blocked"`
-	Filtered int     `json:"filtered"`
-	Latency  float64 `json:"latency"`
-}
-
-// AdGuardHomeStats minimalized response from AdGuard Home API
-type AdGuardHomeStats struct {
+// AdguardHomeStatsResponse minimalized response from AdGuard Home API
+type AdguardHomeStatsResponse struct {
 	NumDNSQueries           int     `json:"num_dns_queries"`
 	NumBlockedFiltering     int     `json:"num_blocked_filtering"`
 	NumReplacedSafeBrowsing int     `json:"num_replaced_safebrowsing"`

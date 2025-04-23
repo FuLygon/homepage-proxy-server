@@ -9,7 +9,7 @@ import (
 )
 
 type AdGuardHomeService interface {
-	GetStats(baseUrl, username, password string) (*models.AdGuardHomeResponse, error)
+	GetStats(baseUrl, username, password string) (*models.AdguardHomeStatsResponse, error)
 }
 
 type adGuardHomeService struct {
@@ -24,7 +24,7 @@ func NewAdGuardHomeService() AdGuardHomeService {
 	}
 }
 
-func (s *adGuardHomeService) GetStats(baseUrl, username, password string) (*models.AdGuardHomeResponse, error) {
+func (s *adGuardHomeService) GetStats(baseUrl, username, password string) (*models.AdguardHomeStatsResponse, error) {
 	// Prepare stats request
 	statsReq, err := http.NewRequest("GET", fmt.Sprintf("%s/control/stats", baseUrl), nil)
 	if err != nil {
@@ -40,18 +40,10 @@ func (s *adGuardHomeService) GetStats(baseUrl, username, password string) (*mode
 	defer resp.Body.Close()
 
 	// Parse stats response
-	var stats models.AdGuardHomeStats
+	var stats models.AdguardHomeStatsResponse
 	if err := json.NewDecoder(resp.Body).Decode(&stats); err != nil {
 		return nil, fmt.Errorf("failed to parse stats response: %w", err)
 	}
 
-	// Map response
-	response := &models.AdGuardHomeResponse{
-		Queries:  stats.NumDNSQueries,
-		Blocked:  stats.NumBlockedFiltering,
-		Filtered: stats.NumReplacedSafeBrowsing + stats.NumReplacedSafeSearch + stats.NumReplacedParental,
-		Latency:  stats.AvgProcessingTime * 1000, // Convert to milliseconds
-	}
-
-	return response, nil
+	return &stats, nil
 }
