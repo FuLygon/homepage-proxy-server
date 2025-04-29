@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"homepage-widgets-gateway/config"
 	"homepage-widgets-gateway/internal/services"
+	"net/http"
 )
 
 type UptimeKumaHandler interface {
@@ -27,7 +28,7 @@ func (h *uptimeKumaHandler) HandleStats(c *gin.Context) {
 	// extract slug param from the Homepage's request
 	reqSlug := c.Param("slug")
 	if reqSlug == "" {
-		c.JSON(400, gin.H{
+		c.JSON(http.StatusBadRequest, gin.H{
 			"error": "Missing slug parameter",
 		})
 		return
@@ -36,19 +37,19 @@ func (h *uptimeKumaHandler) HandleStats(c *gin.Context) {
 	baseConfig := h.config.ServicesConfig.UptimeKuma
 	stats, err := h.service.GetStats(baseConfig.Url, reqSlug)
 	if err != nil {
-		c.JSON(500, gin.H{
+		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})
 		return
 	}
-	c.JSON(200, stats)
+	c.JSON(http.StatusOK, stats)
 }
 
 func (h *uptimeKumaHandler) HandleStatsHeartbeat(c *gin.Context) {
 	// extract slug param from the Homepage's request
 	reqSlug := c.Param("slug")
 	if reqSlug == "" {
-		c.JSON(400, gin.H{
+		c.JSON(http.StatusBadRequest, gin.H{
 			"error": "Missing slug parameter",
 		})
 		return
@@ -57,10 +58,10 @@ func (h *uptimeKumaHandler) HandleStatsHeartbeat(c *gin.Context) {
 	baseConfig := h.config.ServicesConfig.UptimeKuma
 	stats, err := h.service.GetStatsHeartbeat(baseConfig.Url, reqSlug)
 	if err != nil {
-		c.JSON(500, gin.H{
+		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})
 		return
 	}
-	c.JSON(200, stats)
+	c.JSON(http.StatusOK, stats)
 }

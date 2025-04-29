@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"homepage-widgets-gateway/config"
 	"homepage-widgets-gateway/internal/handlers"
+	"net/http"
 )
 
 type Routes interface {
@@ -51,7 +52,7 @@ func (r *routes) RegisterRoutes() {
 
 	// Health check endpoint
 	router.GET("/health", func(c *gin.Context) {
-		c.JSON(200, gin.H{"status": "healthy"})
+		c.JSON(http.StatusOK, gin.H{"status": "healthy"})
 	})
 
 	// Adguard Home - endpoint references from: https://github.com/gethomepage/homepage/blob/main/src/widgets/adguard/widget.js

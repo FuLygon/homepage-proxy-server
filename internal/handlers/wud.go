@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"homepage-widgets-gateway/config"
 	"homepage-widgets-gateway/internal/services"
+	"net/http"
 )
 
 type WUDHandler interface {
@@ -26,10 +27,10 @@ func (h *wudHandler) Handle(c *gin.Context) {
 	baseConfig := h.config.ServicesConfig.WUD
 	stats, err := h.service.GetStats(baseConfig.Url, baseConfig.Username, baseConfig.Password)
 	if err != nil {
-		c.JSON(500, gin.H{
+		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})
 		return
 	}
-	c.JSON(200, stats)
+	c.JSON(http.StatusOK, stats)
 }

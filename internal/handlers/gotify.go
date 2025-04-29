@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"homepage-widgets-gateway/config"
 	"homepage-widgets-gateway/internal/services"
+	"net/http"
 )
 
 type GotifyHandler interface {
@@ -28,34 +29,34 @@ func (h *gotifyHandler) HandleApplication(c *gin.Context) {
 	baseConfig := h.config.ServicesConfig.Gotify
 	stats, err := h.service.GetApplications(baseConfig.Url, baseConfig.Key)
 	if err != nil {
-		c.JSON(500, gin.H{
+		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})
 		return
 	}
-	c.JSON(200, stats)
+	c.JSON(http.StatusOK, stats)
 }
 
 func (h *gotifyHandler) HandleClient(c *gin.Context) {
 	baseConfig := h.config.ServicesConfig.Gotify
 	stats, err := h.service.GetClients(baseConfig.Url, baseConfig.Key)
 	if err != nil {
-		c.JSON(500, gin.H{
+		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})
 		return
 	}
-	c.JSON(200, stats)
+	c.JSON(http.StatusOK, stats)
 }
 
 func (h *gotifyHandler) HandleMessage(c *gin.Context) {
 	baseConfig := h.config.ServicesConfig.Gotify
 	stats, err := h.service.GetMessages(baseConfig.Url, baseConfig.Key)
 	if err != nil {
-		c.JSON(500, gin.H{
+		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})
 		return
 	}
-	c.JSON(200, stats)
+	c.JSON(http.StatusOK, stats)
 }

@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"homepage-widgets-gateway/config"
 	"homepage-widgets-gateway/internal/services"
+	"net/http"
 )
 
 type NPMHandler interface {
@@ -27,12 +28,12 @@ func (h *npmHandler) HandleLogin(c *gin.Context) {
 	baseConfig := h.config.ServicesConfig.NginxProxyManager
 	stats, err := h.service.Login(baseConfig.Url, baseConfig.Username, baseConfig.Password)
 	if err != nil {
-		c.JSON(500, gin.H{
+		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})
 		return
 	}
-	c.JSON(200, stats)
+	c.JSON(http.StatusOK, stats)
 }
 
 func (h *npmHandler) HandleStats(c *gin.Context) {
@@ -40,7 +41,7 @@ func (h *npmHandler) HandleStats(c *gin.Context) {
 	// auth token from Homepage
 	authToken := c.GetHeader("Authorization")
 	if authToken == "" {
-		c.JSON(403, gin.H{
+		c.JSON(http.StatusForbidden, gin.H{
 			"error": "Missing authorization",
 		})
 		return
@@ -48,10 +49,10 @@ func (h *npmHandler) HandleStats(c *gin.Context) {
 
 	stats, err := h.service.GetStats(baseConfig.Url, authToken)
 	if err != nil {
-		c.JSON(500, gin.H{
+		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})
 		return
 	}
-	c.JSON(200, stats)
+	c.JSON(http.StatusOK, stats)
 }
