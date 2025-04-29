@@ -47,6 +47,11 @@ type ServicesConfig struct {
 		Enabled bool   `env:"SERVICE_UPTIME_KUMA_ENABLED" envDefault:"false"`
 		Url     string `env:"SERVICE_UPTIME_KUMA_URL"`
 	}
+	Linkwarden struct {
+		Enabled bool   `env:"SERVICE_LINKWARDEN_ENABLED" envDefault:"false"`
+		Url     string `env:"SERVICE_LINKWARDEN_URL"`
+		Key     string `env:"SERVICE_LINKWARDEN_KEY"`
+	}
 }
 
 // LoadConfig loads configuration from environment variables
@@ -107,6 +112,13 @@ func validateServicesConfig(cfg *Config) error {
 	if config := cfg.UptimeKuma; config.Enabled {
 		if config.Url == "" {
 			return fmt.Errorf("missing configuration for Uptime Kuma")
+		}
+	}
+
+	// Validate Linkwarden
+	if config := cfg.Linkwarden; config.Enabled {
+		if config.Url == "" || config.Key == "" {
+			return fmt.Errorf("missing configuration for Linkwarden")
 		}
 	}
 

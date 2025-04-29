@@ -29,11 +29,12 @@ If it's not possible to map the responding data for Homepage integration, then [
 Currently only support a few integrations:
 
 - Adguard Home
+- Gotify
+- Linkwarden
 - Nginx Proxy Manager
 - Portainer
-- WUD (What's Up Docker)
-- Gotify
 - Uptime Kuma
+- WUD (What's Up Docker)
 
 Initially I planned to make this only for my own Homepage instance. So if there are any integrations that aren't supported, then tough luck. I don't plan to add more integrations unless I need them.
 

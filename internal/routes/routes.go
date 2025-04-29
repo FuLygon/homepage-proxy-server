@@ -20,6 +20,7 @@ type routes struct {
 	wudHandler        handlers.WUDHandler
 	gotifyHandler     handlers.GotifyHandler
 	uptimeKumaHandler handlers.UptimeKumaHandler
+	linkwardenHandler handlers.LinkwardenHandler
 }
 
 func NewRoutes(
@@ -31,6 +32,7 @@ func NewRoutes(
 	wudHandler handlers.WUDHandler,
 	gotifyHandler handlers.GotifyHandler,
 	uptimeKumaHandler handlers.UptimeKumaHandler,
+	linkwardenHandler handlers.LinkwardenHandler,
 ) Routes {
 	return &routes{
 		router:            router,
@@ -41,6 +43,7 @@ func NewRoutes(
 		wudHandler:        wudHandler,
 		gotifyHandler:     gotifyHandler,
 		uptimeKumaHandler: uptimeKumaHandler,
+		linkwardenHandler: linkwardenHandler,
 	}
 }
 
@@ -76,6 +79,10 @@ func (r *routes) RegisterRoutes() {
 	// Uptime Kuma - endpoints references from: https://github.com/gethomepage/homepage/blob/main/src/widgets/uptimekuma/widget.js
 	r.registerServiceRoute(router.GET, "/uptime-kuma/api/status-page/:slug", servicesConfig.UptimeKuma.Enabled, r.uptimeKumaHandler.HandleStats)
 	r.registerServiceRoute(router.GET, "/uptime-kuma/api/status-page/heartbeat/:slug", servicesConfig.UptimeKuma.Enabled, r.uptimeKumaHandler.HandleStatsHeartbeat)
+
+	// Linkwarden - endpoints references from: https://github.com/gethomepage/homepage/blob/main/src/widgets/linkwarden/widget.js
+	r.registerServiceRoute(router.GET, "/linkwarden/api/v1/collections", servicesConfig.Linkwarden.Enabled, r.linkwardenHandler.HandleCollections)
+	r.registerServiceRoute(router.GET, "/linkwarden/api/v1/tags", servicesConfig.Linkwarden.Enabled, r.linkwardenHandler.HandleTags)
 }
 
 // registerServiceRoute registers a route if the service is enabled

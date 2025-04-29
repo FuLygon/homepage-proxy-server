@@ -12,6 +12,22 @@ widget:
   url: http://homepage-widgets-gateway:8080/adguard-home
 ```
 
+### [Gotify](https://gethomepage.dev/widgets/services/gotify)
+
+```yaml
+widget:
+  type: gotify
+  url: http://homepage-widgets-gateway:8080/gotify
+```
+
+### [Linkwarden](https://gethomepage.dev/widgets/services/linkwarden)
+
+```yaml
+widget:
+  type: linkwarden
+  url: http://homepage-widgets-gateway:8080/linkwarden
+```
+
 ### [Nginx Proxy Manager](https://gethomepage.dev/widgets/services/nginx-proxy-manager)
 
 ```yaml
@@ -29,22 +45,6 @@ widget:
   env: 1
 ```
 
-### [WUD (What's Up Docker)](https://gethomepage.dev/widgets/services/whatsupdocker)
-
-```yaml
-widget:
-  type: whatsupdocker
-  url: http://homepage-widgets-gateway:8080/wud
-```
-
-### [Gotify](https://gethomepage.dev/widgets/services/gotify)
-
-```yaml
-widget:
-  type: gotify
-  url: http://homepage-widgets-gateway:8080/gotify
-```
-
 ### [Uptime Kuma](https://gethomepage.dev/widgets/services/uptime-kuma)
 
 ```yaml
@@ -52,4 +52,12 @@ widget:
   type: uptimekuma
   url: http://homepage-widgets-gateway:8080/uptime-kuma
   slug: statuspageslug
+```
+
+### [WUD (What's Up Docker)](https://gethomepage.dev/widgets/services/whatsupdocker)
+
+```yaml
+widget:
+  type: whatsupdocker
+  url: http://homepage-widgets-gateway:8080/wud
 ```

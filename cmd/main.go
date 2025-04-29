@@ -39,6 +39,7 @@ func main() {
 	wudService := services.NewWUDService()
 	gotifyService := services.NewGotifyService()
 	uptimeKumaService := services.NewUptimeKumaService()
+	linkwardenService := services.NewLinkwardenService()
 
 	// Setup handlers
 	adguardHandler := handlers.NewAdGuardHandler(conf, adguardService)
@@ -47,6 +48,7 @@ func main() {
 	wudHandler := handlers.NewWUDHandler(conf, wudService)
 	gotifyHandler := handlers.NewGotifyHandler(conf, gotifyService)
 	uptimeKumaHandler := handlers.NewUptimeKumaHandler(conf, uptimeKumaService)
+	linkwardenHandler := handlers.NewLinkwardenHandler(conf, linkwardenService)
 
 	// Setup routes
 	r := routes.NewRoutes(
@@ -58,6 +60,7 @@ func main() {
 		wudHandler,
 		gotifyHandler,
 		uptimeKumaHandler,
+		linkwardenHandler,
 	)
 
 	// Register routes
