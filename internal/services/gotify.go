@@ -28,8 +28,6 @@ func NewGotifyService() GotifyService {
 	}
 }
 
-type dummy struct{}
-
 // GetApplications implement from https://github.com/gethomepage/homepage/blob/main/src/widgets/gotify/component.jsx
 func (s *gotifyService) GetApplications(baseUrl, key string) (interface{}, error) {
 	// Prepare stats request
@@ -54,7 +52,7 @@ func (s *gotifyService) GetApplications(baseUrl, key string) (interface{}, error
 	}
 
 	// Create a fake response with the same length as applicationsStats
-	response := make([]dummy, len(applicationsStats))
+	response := make([]struct{}, len(applicationsStats))
 	return response, nil
 }
 
@@ -82,7 +80,7 @@ func (s *gotifyService) GetClients(baseUrl, key string) (interface{}, error) {
 	}
 
 	// Create a fake response with the same length as clientsStats
-	response := make([]dummy, len(clientsStats))
+	response := make([]struct{}, len(clientsStats))
 	return response, nil
 }
 
@@ -141,7 +139,7 @@ func (s *gotifyService) GetMessages(baseUrl, key string) (map[string]interface{}
 	}
 
 	// Create a fake response with the same length as totalMessages
-	messages := make([]dummy, totalMessages)
+	messages := make([]struct{}, totalMessages)
 	response := make(map[string]interface{})
 	response["messages"] = messages
 
