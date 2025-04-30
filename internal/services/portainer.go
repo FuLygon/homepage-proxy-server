@@ -42,6 +42,11 @@ func (s *portainerService) GetStats(baseUrl, key string, env int) (*[]models.Por
 	}
 	defer resp.Body.Close()
 
+	// Return error if status code is not 200
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("failed to fetch stats with status: %s", resp.Status)
+	}
+
 	// Parse stats response
 	var response []models.PortainerResponse
 	if err = json.NewDecoder(resp.Body).Decode(&response); err != nil {

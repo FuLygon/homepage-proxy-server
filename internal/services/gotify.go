@@ -45,6 +45,11 @@ func (s *gotifyService) GetApplications(baseUrl, key string) (interface{}, error
 	}
 	defer resp.Body.Close()
 
+	// Return error if status code is not 200
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("failed to fetch application stats with status: %s", resp.Status)
+	}
+
 	// Parse stats response
 	var applicationsStats []map[string]interface{}
 	if err = json.NewDecoder(resp.Body).Decode(&applicationsStats); err != nil {
@@ -72,6 +77,11 @@ func (s *gotifyService) GetClients(baseUrl, key string) (interface{}, error) {
 		return 0, fmt.Errorf("failed to fetch client stats: %w", err)
 	}
 	defer resp.Body.Close()
+
+	// Return error if status code is not 200
+	if resp.StatusCode != http.StatusOK {
+		return 0, fmt.Errorf("failed to fetch client stats with status: %s", resp.Status)
+	}
 
 	// Parse stats response
 	var clientsStats []map[string]interface{}
@@ -117,6 +127,11 @@ func (s *gotifyService) GetMessages(baseUrl, key string) (map[string]interface{}
 				return 0, 0, fmt.Errorf("failed to fetch message stats: %w", err)
 			}
 			defer resp.Body.Close()
+
+			// Return error if status code is not 200
+			if resp.StatusCode != http.StatusOK {
+				return 0, 0, fmt.Errorf("failed to fetch message stats with status: %s", resp.Status)
+			}
 
 			// Parse stats response
 			var messageStats models.GotifyMessageStats

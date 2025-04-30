@@ -40,6 +40,11 @@ func (s *wudService) GetStats(baseUrl, username, password string) (*[]models.WUD
 	}
 	defer resp.Body.Close()
 
+	// Return error if status code is not 200
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("failed to fetch stats with status: %s", resp.Status)
+	}
+
 	// Parse stats response
 	var response []models.WUDResponse
 	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {

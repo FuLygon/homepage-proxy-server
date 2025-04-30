@@ -40,6 +40,11 @@ func (s *adGuardHomeService) GetStats(baseUrl, username, password string) (*mode
 	}
 	defer resp.Body.Close()
 
+	// Return error if status code is not 200
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("failed to fetch stats with status: %s", resp.Status)
+	}
+
 	// Parse stats response
 	var stats models.AdguardHomeStatsResponse
 	if err := json.NewDecoder(resp.Body).Decode(&stats); err != nil {

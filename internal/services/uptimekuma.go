@@ -28,6 +28,11 @@ func (s *uptimeKumaService) GetStats(baseUrl, slug string) (*models.UptimeKumaSt
 	}
 	defer statsResp.Body.Close()
 
+	// Return error if status code is not 200
+	if statsResp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("failed to fetch stats with status: %s", statsResp.Status)
+	}
+
 	// Parse stats response
 	var response models.UptimeKumaStatsResponse
 	if err = json.NewDecoder(statsResp.Body).Decode(&response); err != nil {
@@ -46,6 +51,11 @@ func (s *uptimeKumaService) GetStatsHeartbeat(baseUrl, slug string) (*models.Upt
 		return nil, fmt.Errorf("failed to fetch heartbeat stats: %w", err)
 	}
 	defer heartbeatResp.Body.Close()
+
+	// Return error if status code is not 200
+	if heartbeatResp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("failed to fetch heartbeat stats with status: %s", heartbeatResp.Status)
+	}
 
 	// Parse heartbeat stats response
 	var response models.UptimeKumaStatsHeartbeatResponse

@@ -48,6 +48,11 @@ func (s *npmService) GetStats(baseUrl, authToken string) (*[]models.NPMStatsResp
 	}
 	defer resp.Body.Close()
 
+	// Return error if status code is not 200
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("failed to fetch stats with status: %s", resp.Status)
+	}
+
 	// Parse stats response
 	var stats []models.NPMStatsResponse
 	if err = json.NewDecoder(resp.Body).Decode(&stats); err != nil {

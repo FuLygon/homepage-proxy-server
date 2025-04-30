@@ -41,6 +41,11 @@ func (s *linkwardenService) GetCollections(baseUrl, apiKey string) (*models.Link
 	}
 	defer collectionsResp.Body.Close()
 
+	// Return error if status code is not 200
+	if collectionsResp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("failed to fetch collections with status: %s", collectionsResp.Status)
+	}
+
 	// Parse collections response
 	var response models.LinkwardenStatsResponse
 	if err = json.NewDecoder(collectionsResp.Body).Decode(&response); err != nil {
@@ -65,6 +70,11 @@ func (s *linkwardenService) GetTags(baseUrl, apiKey string) (map[string]interfac
 		return nil, fmt.Errorf("failed to fetch tags: %w", err)
 	}
 	defer tagsResp.Body.Close()
+
+	// Return error if status code is not 200
+	if tagsResp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("failed to fetch tags with status: %s", tagsResp.Status)
+	}
 
 	// Parse tags response
 	var tagsStats models.LinkwardenStatsResponse
