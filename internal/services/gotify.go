@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"homepage-widgets-gateway/internal/models"
-	"log"
 	"net/http"
 	"net/url"
 	"time"
@@ -106,7 +105,7 @@ func (s *gotifyService) GetMessages(baseUrl, key string) (map[string]interface{}
 			// Prepare stats request
 			reqUrl, err := url.Parse(fmt.Sprintf("%s/message", baseUrl))
 			if err != nil {
-				log.Fatal(err)
+				return 0, 0, fmt.Errorf("failed to parse message stats request URL: %w", err)
 			}
 
 			queryParams := reqUrl.Query()
