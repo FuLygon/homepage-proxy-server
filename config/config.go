@@ -52,6 +52,11 @@ type ServicesConfig struct {
 		Url     string `env:"SERVICE_LINKWARDEN_URL"`
 		Key     string `env:"SERVICE_LINKWARDEN_KEY"`
 	}
+	YourSpotify struct {
+		Enabled bool   `env:"SERVICE_YOUR_SPOTIFY_ENABLED" envDefault:"false"`
+		Url     string `env:"SERVICE_YOUR_SPOTIFY_URL"`
+		Token   string `env:"SERVICE_YOUR_SPOTIFY_TOKEN"`
+	}
 }
 
 // LoadConfig loads configuration from environment variables
@@ -119,6 +124,13 @@ func validateServicesConfig(cfg *Config) error {
 	if config := cfg.Linkwarden; config.Enabled {
 		if config.Url == "" || config.Key == "" {
 			return fmt.Errorf("missing configuration for Linkwarden")
+		}
+	}
+
+	// Validate Your Spotify
+	if config := cfg.YourSpotify; config.Enabled {
+		if config.Url == "" || config.Token == "" {
+			return fmt.Errorf("missing configuration for Your Spotify")
 		}
 	}
 

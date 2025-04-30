@@ -40,6 +40,7 @@ func main() {
 	gotifyService := services.NewGotifyService()
 	uptimeKumaService := services.NewUptimeKumaService()
 	linkwardenService := services.NewLinkwardenService()
+	yourSpotifyService := services.NewYourSpotifyService(cacheInstance)
 
 	// Setup handlers
 	adguardHandler := handlers.NewAdGuardHandler(conf, adguardService)
@@ -49,6 +50,7 @@ func main() {
 	gotifyHandler := handlers.NewGotifyHandler(conf, gotifyService)
 	uptimeKumaHandler := handlers.NewUptimeKumaHandler(conf, uptimeKumaService)
 	linkwardenHandler := handlers.NewLinkwardenHandler(conf, linkwardenService)
+	yourSpotifyHandler := handlers.NewYourSpotifyHandler(conf, yourSpotifyService)
 
 	// Setup routes
 	r := routes.NewRoutes(
@@ -61,6 +63,7 @@ func main() {
 		gotifyHandler,
 		uptimeKumaHandler,
 		linkwardenHandler,
+		yourSpotifyHandler,
 	)
 
 	// Register routes

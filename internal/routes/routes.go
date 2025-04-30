@@ -12,15 +12,16 @@ type Routes interface {
 }
 
 type routes struct {
-	router            *gin.Engine
-	config            *config.Config
-	adguardHandler    handlers.AdGuardHandler
-	npmHandler        handlers.NPMHandler
-	portainerHandler  handlers.PortainerHandler
-	wudHandler        handlers.WUDHandler
-	gotifyHandler     handlers.GotifyHandler
-	uptimeKumaHandler handlers.UptimeKumaHandler
-	linkwardenHandler handlers.LinkwardenHandler
+	router             *gin.Engine
+	config             *config.Config
+	adguardHandler     handlers.AdGuardHandler
+	npmHandler         handlers.NPMHandler
+	portainerHandler   handlers.PortainerHandler
+	wudHandler         handlers.WUDHandler
+	gotifyHandler      handlers.GotifyHandler
+	uptimeKumaHandler  handlers.UptimeKumaHandler
+	linkwardenHandler  handlers.LinkwardenHandler
+	yourSpotifyHandler handlers.YourSpotifyHandler
 }
 
 func NewRoutes(
@@ -33,17 +34,19 @@ func NewRoutes(
 	gotifyHandler handlers.GotifyHandler,
 	uptimeKumaHandler handlers.UptimeKumaHandler,
 	linkwardenHandler handlers.LinkwardenHandler,
+	yourSpotifyHandler handlers.YourSpotifyHandler,
 ) Routes {
 	return &routes{
-		router:            router,
-		config:            config,
-		adguardHandler:    adguardHandler,
-		npmHandler:        npmHandler,
-		portainerHandler:  portainerHandler,
-		wudHandler:        wudHandler,
-		gotifyHandler:     gotifyHandler,
-		uptimeKumaHandler: uptimeKumaHandler,
-		linkwardenHandler: linkwardenHandler,
+		router:             router,
+		config:             config,
+		adguardHandler:     adguardHandler,
+		npmHandler:         npmHandler,
+		portainerHandler:   portainerHandler,
+		wudHandler:         wudHandler,
+		gotifyHandler:      gotifyHandler,
+		uptimeKumaHandler:  uptimeKumaHandler,
+		linkwardenHandler:  linkwardenHandler,
+		yourSpotifyHandler: yourSpotifyHandler,
 	}
 }
 
@@ -83,6 +86,9 @@ func (r *routes) RegisterRoutes() {
 	// Linkwarden - endpoints references from: https://github.com/gethomepage/homepage/blob/main/src/widgets/linkwarden/widget.js
 	r.registerServiceRoute(router.GET, "/linkwarden/api/v1/collections", servicesConfig.Linkwarden.Enabled, r.linkwardenHandler.HandleCollections)
 	r.registerServiceRoute(router.GET, "/linkwarden/api/v1/tags", servicesConfig.Linkwarden.Enabled, r.linkwardenHandler.HandleTags)
+
+	// Your Spotify
+	r.registerServiceRoute(router.GET, "/your-spotify", servicesConfig.YourSpotify.Enabled, r.yourSpotifyHandler.Handle)
 }
 
 // registerServiceRoute registers a route if the service is enabled

@@ -36,6 +36,9 @@ Currently only support a few integrations:
 - Uptime Kuma
 - WUD (What's Up Docker)
 
+Integrations that Homepage doesn't support (will be using Custom API widget):
+- Your Spotify
+
 Initially I planned to make this only for my own Homepage instance. So if there are any integrations that aren't supported, then tough luck. I don't plan to add more integrations unless I need them.
 
 But if you implement your own integrations, feel free to open a PR if you want, and I'll check it out.

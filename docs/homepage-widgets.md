@@ -1,7 +1,5 @@
 ## Example widgets configuration for Homepage
 
-Check the official Homepage widgets [documentation](https://gethomepage.dev/widgets) if there is any parameter you don't understand.
-
 There's no need to include widget credentials like password or token since it already configurated in the API Gateway environment variables.
 
 ### [Adguard Home](https://gethomepage.dev/widgets/services/adguard-home)
@@ -60,4 +58,25 @@ widget:
 widget:
   type: whatsupdocker
   url: http://homepage-widgets-gateway:8080/wud
+```
+
+### [Your Spotify](https://github.com/FuLygon/homepage-widgets-gateway/blob/main/docs/your-spotify.md)
+
+```yaml
+widget:
+  type: customapi
+  url: http://homepage-widgets-gateway:8080/your-spotify/?time_range=month
+  refreshInterval: 300000
+  method: GET
+  mappings:
+    - field: songs_listened
+      label: Songs
+      format: number
+    - field: time_listened
+      label: Time
+      format: number
+      suffix: min
+    - field: artists_listened
+      label: Artists
+      format: number
 ```
