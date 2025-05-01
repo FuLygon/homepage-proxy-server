@@ -33,7 +33,7 @@ func (h *yourSpotifyHandler) Handle(c *gin.Context) {
 	}
 
 	baseConfig := h.config.ServicesConfig.YourSpotify
-	stats, err := h.service.GetStats(baseConfig.Url, baseConfig.Token, timeRange)
+	stats, err := h.service.GetStats(c.Request.Context(), baseConfig.Url, baseConfig.Token, timeRange)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),

@@ -1,8 +1,10 @@
 package services
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+	"golang.org/x/sync/errgroup"
 	"homepage-widgets-gateway/internal/cache"
 	"homepage-widgets-gateway/internal/models"
 	"net/http"
@@ -11,7 +13,7 @@ import (
 )
 
 type YourSpotifyService interface {
-	GetStats(baseUrl, token, timeRange string) (*models.YourSpotifyResponse, error)
+	GetStats(ctx context.Context, baseUrl, token, timeRange string) (*models.YourSpotifyResponse, error)
 }
 
 type yourSpotifyService struct {
@@ -30,10 +32,11 @@ func NewYourSpotifyService(cache cache.Cache) YourSpotifyService {
 
 const yourSpotifyResponseCacheKey = "your_spotify_response_%s"
 
-func (s *yourSpotifyService) GetStats(baseUrl, token, timeRange string) (*models.YourSpotifyResponse, error) {
+func (s *yourSpotifyService) GetStats(ctx context.Context, baseUrl, token, timeRange string) (*models.YourSpotifyResponse, error) {
 	// Return cached response if available
 	if cachedResponse, found := s.cache.Get(fmt.Sprintf(yourSpotifyResponseCacheKey, timeRange)); found {
-		return cachedResponse.(*models.YourSpotifyResponse), nil
+		response := cachedResponse.(models.YourSpotifyResponse)
+		return &response, nil
 	}
 
 	startTime, endTime, err := s.getTimeRange(timeRange)
@@ -41,51 +44,69 @@ func (s *yourSpotifyService) GetStats(baseUrl, token, timeRange string) (*models
 		return nil, err
 	}
 
+	var response models.YourSpotifyResponse
+	g, ctx := errgroup.WithContext(ctx)
 	// Get songs listened stats
-	songsListenedEndpoint, err := s.getRequestUrl(baseUrl, "/api/spotify/songs_per", token, startTime, endTime)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get songs listened endpoint: %w", err)
-	}
-	songsListened, err := s.getSongsListened(songsListenedEndpoint)
-	if err != nil {
-		return nil, err
-	}
+	g.Go(func() error {
+		songsListenedEndpoint, err := s.getRequestUrl(baseUrl, "/api/spotify/songs_per", token, startTime, endTime)
+		if err != nil {
+			return fmt.Errorf("failed to get songs listened endpoint: %w", err)
+		}
+		count, err := s.getSongsListened(ctx, songsListenedEndpoint)
+		if err != nil {
+			return err
+		}
+		response.SongsListened = count
+		return nil
+	})
 
 	// Get time listened stats
-	timeListenedEndpoint, err := s.getRequestUrl(baseUrl, "/api/spotify/time_per", token, startTime, endTime)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get time listened endpoint: %w", err)
-	}
-	timeListened, err := s.getTimeListened(timeListenedEndpoint)
-	if err != nil {
-		return nil, err
-	}
+	g.Go(func() error {
+		timeListenedEndpoint, err := s.getRequestUrl(baseUrl, "/api/spotify/time_per", token, startTime, endTime)
+		if err != nil {
+			return fmt.Errorf("failed to get time listened endpoint: %w", err)
+		}
+		count, err := s.getTimeListened(ctx, timeListenedEndpoint)
+		if err != nil {
+			return err
+		}
+		response.TimeListened = count
+		return nil
+	})
 
 	// Get artists listened stats
-	artistsListenedEndpoint, err := s.getRequestUrl(baseUrl, "/api/spotify/different_artists_per", token, startTime, endTime)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get artists listened endpoint: %w", err)
-	}
-	artistsListened, err := s.getArtistsListened(artistsListenedEndpoint)
-	if err != nil {
-		return nil, err
-	}
+	g.Go(func() error {
+		artistsListenedEndpoint, err := s.getRequestUrl(baseUrl, "/api/spotify/different_artists_per", token, startTime, endTime)
+		if err != nil {
+			return fmt.Errorf("failed to get artists listened endpoint: %w", err)
+		}
+		count, err := s.getArtistsListened(ctx, artistsListenedEndpoint)
+		if err != nil {
+			return err
+		}
+		response.ArtistsListened = count
+		return nil
+	})
 
-	response := &models.YourSpotifyResponse{
-		SongsListened:   songsListened,
-		TimeListened:    timeListened,
-		ArtistsListened: artistsListened,
+	// Wait for goroutines
+	if err = g.Wait(); err != nil {
+		return nil, err
 	}
 
 	// Cache the response for 5 min, since Your Spotify also doesn't fetch new data regularly
 	s.cache.Set(fmt.Sprintf(yourSpotifyResponseCacheKey, timeRange), response, 5*time.Minute)
 
-	return response, nil
+	return &response, nil
 }
 
-func (s *yourSpotifyService) getSongsListened(reqUrl string) (int64, error) {
+func (s *yourSpotifyService) getSongsListened(ctx context.Context, reqUrl string) (int64, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, reqUrl, nil)
+	if err != nil {
+		return 0, fmt.Errorf("failed to create song listened stats request: %w", err)
+	}
+
 	// Prepare song listened stats request
-	resp, err := http.Get(reqUrl)
+	resp, err := s.client.Do(req)
 	if err != nil {
 		return 0, fmt.Errorf("failed to fetch songs listened stats: %w", err)
 	}
@@ -109,9 +130,14 @@ func (s *yourSpotifyService) getSongsListened(reqUrl string) (int64, error) {
 	return response[0].Count, nil
 }
 
-func (s *yourSpotifyService) getTimeListened(reqUrl string) (int64, error) {
+func (s *yourSpotifyService) getTimeListened(ctx context.Context, reqUrl string) (int64, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, reqUrl, nil)
+	if err != nil {
+		return 0, fmt.Errorf("failed to create time listened stats request: %w", err)
+	}
+
 	// Prepare time listened stats request
-	resp, err := http.Get(reqUrl)
+	resp, err := s.client.Do(req)
 	if err != nil {
 		return 0, fmt.Errorf("failed to fetch time listened stats: %w", err)
 	}
@@ -135,9 +161,14 @@ func (s *yourSpotifyService) getTimeListened(reqUrl string) (int64, error) {
 	return response[0].Count / 1000 / 60, nil
 }
 
-func (s *yourSpotifyService) getArtistsListened(reqUrl string) (int, error) {
+func (s *yourSpotifyService) getArtistsListened(ctx context.Context, reqUrl string) (int, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, reqUrl, nil)
+	if err != nil {
+		return 0, fmt.Errorf("failed to create artists listened stats request: %w", err)
+	}
+
 	// Prepare artists listened stats request
-	resp, err := http.Get(reqUrl)
+	resp, err := s.client.Do(req)
 	if err != nil {
 		return 0, fmt.Errorf("failed to fetch artists listened stats: %w", err)
 	}
