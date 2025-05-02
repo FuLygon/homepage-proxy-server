@@ -1,14 +1,15 @@
-## Your Spotify widget configuration
+# Your Spotify widget configuration
 
-### Setting up environment variables
+## Setting up environment variables
 
 You'll need to set `SERVICE_YOUR_SPOTIFY_TOKEN` to fetch data, you can grab this token by go to Your Spotify Dashboard > Settings > Account Tab > Public token.
 
 Generate your token, then grab the token value from the URL, e.g if your public token URL is `https://yourspotify.com/?token=faab0509-de47-4282-961a-113050b3331f`, then the value for `SERVICE_YOUR_SPOTIFY_TOKEN` is `faab0509-de47-4282-961a-113050b3331f`
 
-### Example widget config
+## Example widget config
 
 The Custom API widget URL contain a query parameter `time_range`, all of the valid value are:
+
 - `day`: fetch data from yesterday
 - `week`: fetch data from last week
 - `month`: fetch data from last month
@@ -36,7 +37,7 @@ widget:
       format: number
 ```
 
-### API Response
+## API Response
 
 `GET /your-spotify`
 
