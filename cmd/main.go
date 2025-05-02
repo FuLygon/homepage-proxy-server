@@ -1,13 +1,17 @@
 package main
 
 import (
+	"context"
+	"github.com/docker/docker/client"
 	"github.com/gin-gonic/gin"
 	"homepage-widgets-gateway/config"
 	"homepage-widgets-gateway/internal/cache"
+	"homepage-widgets-gateway/internal/docker"
 	"homepage-widgets-gateway/internal/handlers"
 	"homepage-widgets-gateway/internal/routes"
 	"homepage-widgets-gateway/internal/services"
 	"log"
+	"time"
 )
 
 func main() {
@@ -29,8 +33,28 @@ func main() {
 		}
 	}
 
+	// Create Docker Client
+	var dockerClient *client.Client
+	if conf.WireGuard.Method == "docker" {
+		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+		defer cancel()
+
+		dockerClient, err = client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+		if err != nil {
+			log.Fatalf("error creating docker client: %v", err)
+		}
+		defer dockerClient.Close()
+
+		_, err = dockerClient.Ping(ctx)
+		if err != nil {
+			log.Fatalf("error pinging docker daemon: %v", err)
+		}
+	}
+
 	// Initialize cache
 	cacheInstance := cache.NewCache()
+	// Initialize docker
+	dockerInstance := docker.NewDocker(dockerClient)
 
 	// Setup services
 	adguardService := services.NewAdGuardHomeService()
@@ -41,6 +65,7 @@ func main() {
 	uptimeKumaService := services.NewUptimeKumaService()
 	linkwardenService := services.NewLinkwardenService()
 	yourSpotifyService := services.NewYourSpotifyService(cacheInstance)
+	wireguardService := services.NewWireGuardService(dockerInstance)
 
 	// Setup handlers
 	adguardHandler := handlers.NewAdGuardHandler(conf, adguardService)
@@ -51,6 +76,7 @@ func main() {
 	uptimeKumaHandler := handlers.NewUptimeKumaHandler(conf, uptimeKumaService)
 	linkwardenHandler := handlers.NewLinkwardenHandler(conf, linkwardenService)
 	yourSpotifyHandler := handlers.NewYourSpotifyHandler(conf, yourSpotifyService)
+	wireguardHandler := handlers.NewWireGuardHandler(conf, wireguardService)
 
 	// Setup routes
 	r := routes.NewRoutes(
@@ -64,6 +90,7 @@ func main() {
 		uptimeKumaHandler,
 		linkwardenHandler,
 		yourSpotifyHandler,
+		wireguardHandler,
 	)
 
 	// Register routes

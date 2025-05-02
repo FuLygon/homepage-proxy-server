@@ -52,6 +52,23 @@ widget:
   slug: statuspageslug
 ```
 
+### [WireGuard](wireguard.md)
+
+```yaml
+widget:
+  type: customapi
+  url: http://homepage-widgets-gateway:8080/wireguard
+  refreshInterval: 300000 # 5 minutes
+  method: GET
+  mappings:
+    - field: total
+      label: Total
+      format: number
+    - field: connected
+      label: Connected
+      format: number
+```
+
 ### [WUD (What's Up Docker)](https://gethomepage.dev/widgets/services/whatsupdocker)
 
 ```yaml
@@ -60,7 +77,7 @@ widget:
   url: http://homepage-widgets-gateway:8080/wud
 ```
 
-### [Your Spotify](https://github.com/FuLygon/homepage-widgets-gateway/blob/main/docs/your-spotify.md)
+### [Your Spotify](your-spotify.md)
 
 ```yaml
 widget:

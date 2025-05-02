@@ -37,6 +37,7 @@ Currently only support a few integrations:
 - WUD (What's Up Docker)
 
 Integrations that Homepage doesn't support (will be using Custom API widget):
+- WireGuard
 - Your Spotify
 
 Initially I planned to make this only for my own Homepage instance. So if there are any integrations that aren't supported, then tough luck. I don't plan to add more integrations unless I need them.

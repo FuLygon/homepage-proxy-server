@@ -57,6 +57,13 @@ type ServicesConfig struct {
 		Url     string `env:"SERVICE_YOUR_SPOTIFY_URL"`
 		Token   string `env:"SERVICE_YOUR_SPOTIFY_TOKEN"`
 	}
+	WireGuard struct {
+		Enabled         bool   `env:"SERVICE_WIREGUARD_ENABLED" envDefault:"false"`
+		Method          string `env:"SERVICE_WIREGUARD_METHOD"`
+		Interface       string `env:"SERVICE_WIREGUARD_INTERFACE"`
+		Timeout         int    `env:"SERVICE_WIREGUARD_TIMEOUT" envDefault:"5"`
+		DockerContainer string `env:"SERVICE_WIREGUARD_DOCKER_CONTAINER"`
+	}
 }
 
 // LoadConfig loads configuration from environment variables
@@ -134,5 +141,23 @@ func validateServicesConfig(cfg *Config) error {
 		}
 	}
 
+	// Validate WireGuard
+	if config := cfg.WireGuard; config.Enabled {
+		if config.Method == "" {
+			return fmt.Errorf("missing configuration for WireGuard")
+		}
+
+		if config.Method != "docker" && config.Method != "local" && config.Method != "external" {
+			return fmt.Errorf("misconfigured WireGuard method")
+		}
+
+		if (config.Method == "docker" || config.Method == "local") && config.Interface == "" {
+			return fmt.Errorf("missing WireGuard interface name")
+		}
+
+		if config.Method == "docker" && config.DockerContainer == "" {
+			return fmt.Errorf("missing Docker container name for WireGuard")
+		}
+	}
 	return nil
 }

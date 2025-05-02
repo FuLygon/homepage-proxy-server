@@ -22,6 +22,7 @@ type routes struct {
 	uptimeKumaHandler  handlers.UptimeKumaHandler
 	linkwardenHandler  handlers.LinkwardenHandler
 	yourSpotifyHandler handlers.YourSpotifyHandler
+	wireGuardHandler   handlers.WireGuardHandler
 }
 
 func NewRoutes(
@@ -35,6 +36,7 @@ func NewRoutes(
 	uptimeKumaHandler handlers.UptimeKumaHandler,
 	linkwardenHandler handlers.LinkwardenHandler,
 	yourSpotifyHandler handlers.YourSpotifyHandler,
+	wireGuardHandler handlers.WireGuardHandler,
 ) Routes {
 	return &routes{
 		router:             router,
@@ -47,6 +49,7 @@ func NewRoutes(
 		uptimeKumaHandler:  uptimeKumaHandler,
 		linkwardenHandler:  linkwardenHandler,
 		yourSpotifyHandler: yourSpotifyHandler,
+		wireGuardHandler:   wireGuardHandler,
 	}
 }
 
@@ -89,6 +92,9 @@ func (r *routes) RegisterRoutes() {
 
 	// Your Spotify
 	r.registerServiceRoute(router.GET, "/your-spotify", servicesConfig.YourSpotify.Enabled, r.yourSpotifyHandler.Handle)
+
+	// WireGuard
+	r.registerServiceRoute(router.GET, "/wireguard", servicesConfig.WireGuard.Enabled, r.wireGuardHandler.Handle)
 }
 
 // registerServiceRoute registers a route if the service is enabled
