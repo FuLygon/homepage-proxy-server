@@ -63,7 +63,7 @@ func main() {
 	wudService := services.NewWUDService()
 	gotifyService := services.NewGotifyService(conf.ServicesConfig)
 	uptimeKumaService := services.NewUptimeKumaService()
-	linkwardenService := services.NewLinkwardenService()
+	linkwardenService := services.NewLinkwardenService(conf.ServicesConfig)
 	yourSpotifyService := services.NewYourSpotifyService(cacheInstance)
 	wireguardService := services.NewWireGuardService(dockerInstance)
 
@@ -74,7 +74,7 @@ func main() {
 	wudHandler := handlers.NewWUDHandler(conf, wudService)
 	gotifyHandler := handlers.NewGotifyHandler(gotifyService)
 	uptimeKumaHandler := handlers.NewUptimeKumaHandler(conf, uptimeKumaService)
-	linkwardenHandler := handlers.NewLinkwardenHandler(conf, linkwardenService)
+	linkwardenHandler := handlers.NewLinkwardenHandler(linkwardenService)
 	yourSpotifyHandler := handlers.NewYourSpotifyHandler(conf, yourSpotifyService)
 	wireguardHandler := handlers.NewWireGuardHandler(conf, wireguardService)
 

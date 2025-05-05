@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"github.com/gin-gonic/gin"
-	"homepage-widgets-gateway/config"
 	"homepage-widgets-gateway/internal/services"
 	"net/http"
 )
@@ -13,20 +12,17 @@ type LinkwardenHandler interface {
 }
 
 type linkwardenHandler struct {
-	config  *config.Config
 	service services.LinkwardenService
 }
 
-func NewLinkwardenHandler(config *config.Config, service services.LinkwardenService) LinkwardenHandler {
+func NewLinkwardenHandler(service services.LinkwardenService) LinkwardenHandler {
 	return &linkwardenHandler{
-		config:  config,
 		service: service,
 	}
 }
 
 func (h *linkwardenHandler) HandleCollections(c *gin.Context) {
-	baseConfig := h.config.ServicesConfig.Linkwarden
-	collections, err := h.service.GetCollections(baseConfig.Url, baseConfig.Key)
+	collections, err := h.service.GetCollections()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
@@ -37,8 +33,7 @@ func (h *linkwardenHandler) HandleCollections(c *gin.Context) {
 }
 
 func (h *linkwardenHandler) HandleTags(c *gin.Context) {
-	baseConfig := h.config.ServicesConfig.Linkwarden
-	tags, err := h.service.GetTags(baseConfig.Url, baseConfig.Key)
+	tags, err := h.service.GetTags()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),

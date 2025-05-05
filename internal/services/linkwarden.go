@@ -3,36 +3,42 @@ package services
 import (
 	"encoding/json"
 	"fmt"
+	"homepage-widgets-gateway/config"
 	"homepage-widgets-gateway/internal/models"
 	"net/http"
 	"time"
 )
 
 type LinkwardenService interface {
-	GetCollections(baseUrl, apiKey string) (*models.LinkwardenStatsResponse, error)
-	GetTags(baseUrl, apiKey string) (map[string]interface{}, error)
+	GetCollections() (*models.LinkwardenStatsResponse, error)
+	GetTags() (map[string]interface{}, error)
 }
 
 type linkwardenService struct {
-	client *http.Client
+	client  *http.Client
+	baseUrl string
+	apiKey  string
 }
 
-func NewLinkwardenService() LinkwardenService {
+func NewLinkwardenService(serviceConfig config.ServicesConfig) LinkwardenService {
+	baseConfig := serviceConfig.Linkwarden
 	return &linkwardenService{
 		client: &http.Client{
 			Timeout: 10 * time.Second,
 		},
+		baseUrl: baseConfig.Url,
+		apiKey:  baseConfig.Key,
 	}
 }
 
 // GetCollections implement from https://github.com/gethomepage/homepage/blob/main/src/widgets/linkwarden/component.jsx
-func (s *linkwardenService) GetCollections(baseUrl, apiKey string) (*models.LinkwardenStatsResponse, error) {
+func (s *linkwardenService) GetCollections() (*models.LinkwardenStatsResponse, error) {
 	// Prepare collections request
-	collectionsReq, err := http.NewRequest("GET", fmt.Sprintf("%s/api/v1/collections", baseUrl), nil)
+	collectionsReq, err := http.NewRequest("GET", fmt.Sprintf("%s/api/v1/collections", s.baseUrl), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to prepare collections request: %w", err)
 	}
-	collectionsReq.Header.Add("Authorization", fmt.Sprintf("Bearer %s", apiKey))
+	collectionsReq.Header.Add("Authorization", fmt.Sprintf("Bearer %s", s.apiKey))
 
 	// Make collections request
 	collectionsResp, err := s.client.Do(collectionsReq)
@@ -56,13 +62,13 @@ func (s *linkwardenService) GetCollections(baseUrl, apiKey string) (*models.Link
 }
 
 // GetTags implement from https://github.com/gethomepage/homepage/blob/main/src/widgets/linkwarden/component.jsx
-func (s *linkwardenService) GetTags(baseUrl, apiKey string) (map[string]interface{}, error) {
+func (s *linkwardenService) GetTags() (map[string]interface{}, error) {
 	// Prepare tags request
-	tagsReq, err := http.NewRequest("GET", fmt.Sprintf("%s/api/v1/tags", baseUrl), nil)
+	tagsReq, err := http.NewRequest("GET", fmt.Sprintf("%s/api/v1/tags", s.baseUrl), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to prepare tags request: %w", err)
 	}
-	tagsReq.Header.Add("Authorization", fmt.Sprintf("Bearer %s", apiKey))
+	tagsReq.Header.Add("Authorization", fmt.Sprintf("Bearer %s", s.apiKey))
 
 	// Make tags request
 	tagsResp, err := s.client.Do(tagsReq)
