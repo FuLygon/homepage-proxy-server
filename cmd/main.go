@@ -59,7 +59,7 @@ func main() {
 	// Setup services
 	adguardService := services.NewAdGuardHomeService(conf.ServicesConfig)
 	npmService := services.NewNPMService(conf.ServicesConfig, cacheInstance)
-	portainerService := services.NewPortainerService()
+	portainerService := services.NewPortainerService(conf.ServicesConfig)
 	wudService := services.NewWUDService()
 	gotifyService := services.NewGotifyService(conf.ServicesConfig)
 	uptimeKumaService := services.NewUptimeKumaService()
@@ -70,7 +70,7 @@ func main() {
 	// Setup handlers
 	adguardHandler := handlers.NewAdGuardHandler(adguardService)
 	npmHandler := handlers.NewNPMHandler(npmService)
-	portainerHandler := handlers.NewPortainerHandler(conf, portainerService)
+	portainerHandler := handlers.NewPortainerHandler(portainerService)
 	wudHandler := handlers.NewWUDHandler(conf, wudService)
 	gotifyHandler := handlers.NewGotifyHandler(gotifyService)
 	uptimeKumaHandler := handlers.NewUptimeKumaHandler(conf, uptimeKumaService)
