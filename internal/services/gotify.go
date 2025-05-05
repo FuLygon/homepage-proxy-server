@@ -3,6 +3,7 @@ package services
 import (
 	"encoding/json"
 	"fmt"
+	"homepage-widgets-gateway/config"
 	"homepage-widgets-gateway/internal/models"
 	"net/http"
 	"net/url"
@@ -10,32 +11,37 @@ import (
 )
 
 type GotifyService interface {
-	GetMessages(baseUrl, key string) (map[string]interface{}, error)
-	GetApplications(baseUrl, key string) (interface{}, error)
-	GetClients(baseUrl, key string) (interface{}, error)
+	GetMessages() (map[string]interface{}, error)
+	GetApplications() (interface{}, error)
+	GetClients() (interface{}, error)
 }
 
 type gotifyService struct {
-	client *http.Client
+	client  *http.Client
+	baseUrl string
+	key     string
 }
 
-func NewGotifyService() GotifyService {
+func NewGotifyService(serviceConfig config.ServicesConfig) GotifyService {
+	baseConfig := serviceConfig.Gotify
 	return &gotifyService{
 		client: &http.Client{
 			Timeout: 10 * time.Second,
 		},
+		baseUrl: baseConfig.Url,
+		key:     baseConfig.Key,
 	}
 }
 
 // GetApplications implement from https://github.com/gethomepage/homepage/blob/main/src/widgets/gotify/component.jsx
-func (s *gotifyService) GetApplications(baseUrl, key string) (interface{}, error) {
+func (s *gotifyService) GetApplications() (interface{}, error) {
 	// Prepare stats request
-	applicationStatsReq, err := http.NewRequest("GET", fmt.Sprintf("%s/application", baseUrl), nil)
+	applicationStatsReq, err := http.NewRequest("GET", fmt.Sprintf("%s/application", s.baseUrl), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to prepare application stats request: %w", err)
 	}
 
-	applicationStatsReq.Header.Add("X-Gotify-Key", key)
+	applicationStatsReq.Header.Add("X-Gotify-Key", s.key)
 
 	// Make stats request
 	resp, err := s.client.Do(applicationStatsReq)
@@ -61,14 +67,14 @@ func (s *gotifyService) GetApplications(baseUrl, key string) (interface{}, error
 }
 
 // GetClients implement from https://github.com/gethomepage/homepage/blob/main/src/widgets/gotify/component.jsx
-func (s *gotifyService) GetClients(baseUrl, key string) (interface{}, error) {
+func (s *gotifyService) GetClients() (interface{}, error) {
 	// Prepare stats request
-	clientStatsReq, err := http.NewRequest("GET", fmt.Sprintf("%s/client", baseUrl), nil)
+	clientStatsReq, err := http.NewRequest("GET", fmt.Sprintf("%s/client", s.baseUrl), nil)
 	if err != nil {
 		return 0, fmt.Errorf("failed to prepare client stats request: %w", err)
 	}
 
-	clientStatsReq.Header.Add("X-Gotify-Key", key)
+	clientStatsReq.Header.Add("X-Gotify-Key", s.key)
 
 	// Make stats request
 	resp, err := s.client.Do(clientStatsReq)
@@ -95,7 +101,7 @@ func (s *gotifyService) GetClients(baseUrl, key string) (interface{}, error) {
 
 // GetMessages partially implement from https://github.com/gethomepage/homepage/blob/main/src/widgets/gotify/component.jsx
 // Because the current implementation by Homepage has an issue where messages are capped at 100
-func (s *gotifyService) GetMessages(baseUrl, key string) (map[string]interface{}, error) {
+func (s *gotifyService) GetMessages() (map[string]interface{}, error) {
 	var (
 		totalMessages int
 		offset        int
@@ -103,7 +109,7 @@ func (s *gotifyService) GetMessages(baseUrl, key string) (map[string]interface{}
 	for {
 		size, since, err := func() (int, int, error) {
 			// Prepare stats request
-			reqUrl, err := url.Parse(fmt.Sprintf("%s/message", baseUrl))
+			reqUrl, err := url.Parse(fmt.Sprintf("%s/message", s.baseUrl))
 			if err != nil {
 				return 0, 0, fmt.Errorf("failed to parse message stats request URL: %w", err)
 			}
@@ -118,7 +124,7 @@ func (s *gotifyService) GetMessages(baseUrl, key string) (map[string]interface{}
 				return 0, 0, fmt.Errorf("failed to prepare message stats request: %w", err)
 			}
 
-			clientStatsReq.Header.Add("X-Gotify-Key", key)
+			clientStatsReq.Header.Add("X-Gotify-Key", s.key)
 
 			// Make stats request
 			resp, err := s.client.Do(clientStatsReq)

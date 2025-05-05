@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"github.com/gin-gonic/gin"
-	"homepage-widgets-gateway/config"
 	"homepage-widgets-gateway/internal/services"
 	"net/http"
 )
@@ -14,20 +13,17 @@ type GotifyHandler interface {
 }
 
 type gotifyHandler struct {
-	config  *config.Config
 	service services.GotifyService
 }
 
-func NewGotifyHandler(config *config.Config, service services.GotifyService) GotifyHandler {
+func NewGotifyHandler(service services.GotifyService) GotifyHandler {
 	return &gotifyHandler{
-		config:  config,
 		service: service,
 	}
 }
 
 func (h *gotifyHandler) HandleApplication(c *gin.Context) {
-	baseConfig := h.config.ServicesConfig.Gotify
-	stats, err := h.service.GetApplications(baseConfig.Url, baseConfig.Key)
+	stats, err := h.service.GetApplications()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
@@ -38,8 +34,7 @@ func (h *gotifyHandler) HandleApplication(c *gin.Context) {
 }
 
 func (h *gotifyHandler) HandleClient(c *gin.Context) {
-	baseConfig := h.config.ServicesConfig.Gotify
-	stats, err := h.service.GetClients(baseConfig.Url, baseConfig.Key)
+	stats, err := h.service.GetClients()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
@@ -50,8 +45,7 @@ func (h *gotifyHandler) HandleClient(c *gin.Context) {
 }
 
 func (h *gotifyHandler) HandleMessage(c *gin.Context) {
-	baseConfig := h.config.ServicesConfig.Gotify
-	stats, err := h.service.GetMessages(baseConfig.Url, baseConfig.Key)
+	stats, err := h.service.GetMessages()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
