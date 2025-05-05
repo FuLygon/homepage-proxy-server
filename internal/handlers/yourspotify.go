@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"github.com/gin-gonic/gin"
-	"homepage-widgets-gateway/config"
 	"homepage-widgets-gateway/internal/services"
 	"net/http"
 )
@@ -12,13 +11,11 @@ type YourSpotifyHandler interface {
 }
 
 type yourSpotifyHandler struct {
-	config  *config.Config
 	service services.YourSpotifyService
 }
 
-func NewYourSpotifyHandler(config *config.Config, service services.YourSpotifyService) YourSpotifyHandler {
+func NewYourSpotifyHandler(service services.YourSpotifyService) YourSpotifyHandler {
 	return &yourSpotifyHandler{
-		config:  config,
 		service: service,
 	}
 }
@@ -32,8 +29,7 @@ func (h *yourSpotifyHandler) Handle(c *gin.Context) {
 		return
 	}
 
-	baseConfig := h.config.ServicesConfig.YourSpotify
-	stats, err := h.service.GetStats(c.Request.Context(), baseConfig.Url, baseConfig.Token, timeRange)
+	stats, err := h.service.GetStats(c.Request.Context(), timeRange)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),

@@ -65,7 +65,7 @@ func main() {
 	gotifyService := services.NewGotifyService(serviceConfig)
 	uptimeKumaService := services.NewUptimeKumaService(serviceConfig)
 	linkwardenService := services.NewLinkwardenService(serviceConfig)
-	yourSpotifyService := services.NewYourSpotifyService(cacheInstance)
+	yourSpotifyService := services.NewYourSpotifyService(serviceConfig, cacheInstance)
 	wireguardService := services.NewWireGuardService(serviceConfig, dockerInstance)
 
 	// Setup handlers
@@ -76,7 +76,7 @@ func main() {
 	gotifyHandler := handlers.NewGotifyHandler(gotifyService)
 	uptimeKumaHandler := handlers.NewUptimeKumaHandler(uptimeKumaService)
 	linkwardenHandler := handlers.NewLinkwardenHandler(linkwardenService)
-	yourSpotifyHandler := handlers.NewYourSpotifyHandler(conf, yourSpotifyService)
+	yourSpotifyHandler := handlers.NewYourSpotifyHandler(yourSpotifyService)
 	wireguardHandler := handlers.NewWireGuardHandler(serviceConfig, wireguardService)
 
 	// Setup routes
