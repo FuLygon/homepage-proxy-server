@@ -3,25 +3,31 @@ package services
 import (
 	"encoding/json"
 	"fmt"
+	"homepage-widgets-gateway/config"
 	"homepage-widgets-gateway/internal/models"
 	"net/http"
 )
 
 type UptimeKumaService interface {
-	GetStats(baseUrl, slug string) (*models.UptimeKumaStatsResponse, error)
-	GetStatsHeartbeat(baseUrl, slug string) (*models.UptimeKumaStatsHeartbeatResponse, error)
+	GetStats(slug string) (*models.UptimeKumaStatsResponse, error)
+	GetStatsHeartbeat(slug string) (*models.UptimeKumaStatsHeartbeatResponse, error)
 }
 
-type uptimeKumaService struct{}
+type uptimeKumaService struct {
+	baseUrl string
+}
 
-func NewUptimeKumaService() UptimeKumaService {
-	return &uptimeKumaService{}
+func NewUptimeKumaService(serviceConfig config.ServicesConfig) UptimeKumaService {
+	baseConfig := serviceConfig.UptimeKuma
+	return &uptimeKumaService{
+		baseUrl: baseConfig.Url,
+	}
 }
 
 // GetStats implement from https://github.com/gethomepage/homepage/blob/main/src/widgets/uptimekuma/component.jsx
-func (s *uptimeKumaService) GetStats(baseUrl, slug string) (*models.UptimeKumaStatsResponse, error) {
+func (s *uptimeKumaService) GetStats(slug string) (*models.UptimeKumaStatsResponse, error) {
 	// Get stats data
-	statsUrl := fmt.Sprintf("%s/api/status-page/%s", baseUrl, slug)
+	statsUrl := fmt.Sprintf("%s/api/status-page/%s", s.baseUrl, slug)
 	statsResp, err := http.Get(statsUrl)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch stats: %w", err)
@@ -43,9 +49,9 @@ func (s *uptimeKumaService) GetStats(baseUrl, slug string) (*models.UptimeKumaSt
 }
 
 // GetStatsHeartbeat implement from https://github.com/gethomepage/homepage/blob/main/src/widgets/uptimekuma/component.jsx
-func (s *uptimeKumaService) GetStatsHeartbeat(baseUrl, slug string) (*models.UptimeKumaStatsHeartbeatResponse, error) {
+func (s *uptimeKumaService) GetStatsHeartbeat(slug string) (*models.UptimeKumaStatsHeartbeatResponse, error) {
 	// Get heartbeat data
-	heartbeatUrl := fmt.Sprintf("%s/api/status-page/heartbeat/%s", baseUrl, slug)
+	heartbeatUrl := fmt.Sprintf("%s/api/status-page/heartbeat/%s", s.baseUrl, slug)
 	heartbeatResp, err := http.Get(heartbeatUrl)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch heartbeat stats: %w", err)

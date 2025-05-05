@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"github.com/gin-gonic/gin"
-	"homepage-widgets-gateway/config"
 	"homepage-widgets-gateway/internal/services"
 	"net/http"
 )
@@ -13,13 +12,11 @@ type UptimeKumaHandler interface {
 }
 
 type uptimeKumaHandler struct {
-	config  *config.Config
 	service services.UptimeKumaService
 }
 
-func NewUptimeKumaHandler(config *config.Config, service services.UptimeKumaService) UptimeKumaHandler {
+func NewUptimeKumaHandler(service services.UptimeKumaService) UptimeKumaHandler {
 	return &uptimeKumaHandler{
-		config:  config,
 		service: service,
 	}
 }
@@ -34,8 +31,7 @@ func (h *uptimeKumaHandler) HandleStats(c *gin.Context) {
 		return
 	}
 
-	baseConfig := h.config.ServicesConfig.UptimeKuma
-	stats, err := h.service.GetStats(baseConfig.Url, reqSlug)
+	stats, err := h.service.GetStats(reqSlug)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
@@ -55,8 +51,7 @@ func (h *uptimeKumaHandler) HandleStatsHeartbeat(c *gin.Context) {
 		return
 	}
 
-	baseConfig := h.config.ServicesConfig.UptimeKuma
-	stats, err := h.service.GetStatsHeartbeat(baseConfig.Url, reqSlug)
+	stats, err := h.service.GetStatsHeartbeat(reqSlug)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
