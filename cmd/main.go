@@ -57,7 +57,7 @@ func main() {
 	dockerInstance := docker.NewDocker(dockerClient)
 
 	// Setup services
-	adguardService := services.NewAdGuardHomeService()
+	adguardService := services.NewAdGuardHomeService(conf.ServicesConfig)
 	npmService := services.NewNPMService(cacheInstance)
 	portainerService := services.NewPortainerService()
 	wudService := services.NewWUDService()
@@ -68,7 +68,7 @@ func main() {
 	wireguardService := services.NewWireGuardService(dockerInstance)
 
 	// Setup handlers
-	adguardHandler := handlers.NewAdGuardHandler(conf, adguardService)
+	adguardHandler := handlers.NewAdGuardHandler(adguardService)
 	npmHandler := handlers.NewNPMHandler(conf, npmService)
 	portainerHandler := handlers.NewPortainerHandler(conf, portainerService)
 	wudHandler := handlers.NewWUDHandler(conf, wudService)
