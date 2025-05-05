@@ -57,26 +57,27 @@ func main() {
 	dockerInstance := docker.NewDocker(dockerClient)
 
 	// Setup services
-	adguardService := services.NewAdGuardHomeService(conf.ServicesConfig)
-	npmService := services.NewNPMService(conf.ServicesConfig, cacheInstance)
-	portainerService := services.NewPortainerService(conf.ServicesConfig)
-	wudService := services.NewWUDService()
-	gotifyService := services.NewGotifyService(conf.ServicesConfig)
-	uptimeKumaService := services.NewUptimeKumaService(conf.ServicesConfig)
-	linkwardenService := services.NewLinkwardenService(conf.ServicesConfig)
+	serviceConfig := conf.ServicesConfig
+	adguardService := services.NewAdGuardHomeService(serviceConfig)
+	npmService := services.NewNPMService(serviceConfig, cacheInstance)
+	portainerService := services.NewPortainerService(serviceConfig)
+	wudService := services.NewWUDService(serviceConfig)
+	gotifyService := services.NewGotifyService(serviceConfig)
+	uptimeKumaService := services.NewUptimeKumaService(serviceConfig)
+	linkwardenService := services.NewLinkwardenService(serviceConfig)
 	yourSpotifyService := services.NewYourSpotifyService(cacheInstance)
-	wireguardService := services.NewWireGuardService(conf.ServicesConfig, dockerInstance)
+	wireguardService := services.NewWireGuardService(serviceConfig, dockerInstance)
 
 	// Setup handlers
 	adguardHandler := handlers.NewAdGuardHandler(adguardService)
 	npmHandler := handlers.NewNPMHandler(npmService)
 	portainerHandler := handlers.NewPortainerHandler(portainerService)
-	wudHandler := handlers.NewWUDHandler(conf, wudService)
+	wudHandler := handlers.NewWUDHandler(wudService)
 	gotifyHandler := handlers.NewGotifyHandler(gotifyService)
 	uptimeKumaHandler := handlers.NewUptimeKumaHandler(uptimeKumaService)
 	linkwardenHandler := handlers.NewLinkwardenHandler(linkwardenService)
 	yourSpotifyHandler := handlers.NewYourSpotifyHandler(conf, yourSpotifyService)
-	wireguardHandler := handlers.NewWireGuardHandler(conf, wireguardService)
+	wireguardHandler := handlers.NewWireGuardHandler(serviceConfig, wireguardService)
 
 	// Setup routes
 	r := routes.NewRoutes(
