@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"homepage-widgets-gateway/config"
 	"homepage-widgets-gateway/internal/docker"
 	"homepage-widgets-gateway/internal/models"
 	"os"
@@ -16,28 +17,36 @@ import (
 )
 
 type WireGuardService interface {
-	GetLocalStats(interfaceName string, timeout int) (*models.WireGuardStatsResponse, error)
-	GetDockerStats(ctx context.Context, interfaceName, container string, timeout int) (*models.WireGuardStatsResponse, error)
+	GetLocalStats() (*models.WireGuardStatsResponse, error)
+	GetDockerStats(ctx context.Context) (*models.WireGuardStatsResponse, error)
 	GetExternalStats() (*models.WireGuardStatsResponse, error)
 }
 
 type wireGuardService struct {
-	docker docker.Docker
+	docker        docker.Docker
+	interfaceName string
+	container     string
+	timeout       int
 }
 
-func NewWireGuardService(docker docker.Docker) WireGuardService {
-	return &wireGuardService{docker: docker}
+func NewWireGuardService(serviceConfig config.ServicesConfig, docker docker.Docker) WireGuardService {
+	return &wireGuardService{
+		docker:        docker,
+		interfaceName: serviceConfig.WireGuard.Interface,
+		container:     serviceConfig.WireGuard.DockerContainer,
+		timeout:       serviceConfig.WireGuard.Timeout,
+	}
 }
 
 const wgExternalClientsDir = "wireguard-clients"
 
-func (w *wireGuardService) GetLocalStats(interfaceName string, timeout int) (*models.WireGuardStatsResponse, error) {
+func (s *wireGuardService) GetLocalStats() (*models.WireGuardStatsResponse, error) {
 	var (
 		stdout bytes.Buffer
 		stderr bytes.Buffer
 	)
 
-	cmd := exec.Command("wg", "show", interfaceName, "dump")
+	cmd := exec.Command("wg", "show", s.interfaceName, "dump")
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 	err := cmd.Run()
@@ -49,7 +58,7 @@ func (w *wireGuardService) GetLocalStats(interfaceName string, timeout int) (*mo
 		return nil, fmt.Errorf("error executing wg command: %w", err)
 	}
 
-	total, connected, err := w.processOutput(&stdout, time.Duration(timeout))
+	total, connected, err := s.processOutput(&stdout, time.Duration(s.timeout))
 	if err != nil {
 		return nil, fmt.Errorf("error processing WireGuard output: %w", err)
 	}
@@ -60,13 +69,13 @@ func (w *wireGuardService) GetLocalStats(interfaceName string, timeout int) (*mo
 	}, nil
 }
 
-func (w *wireGuardService) GetDockerStats(ctx context.Context, interfaceName, container string, timeout int) (*models.WireGuardStatsResponse, error) {
-	stdout, err := w.docker.Exec(ctx, container, []string{"wg", "show", interfaceName, "dump"})
+func (s *wireGuardService) GetDockerStats(ctx context.Context) (*models.WireGuardStatsResponse, error) {
+	stdout, err := s.docker.Exec(ctx, s.container, []string{"wg", "show", s.interfaceName, "dump"})
 	if err != nil {
 		return nil, fmt.Errorf("error executing wg command: %w", err)
 	}
 
-	total, connected, err := w.processOutput(stdout, time.Duration(timeout))
+	total, connected, err := s.processOutput(stdout, time.Duration(s.timeout))
 	if err != nil {
 		return nil, fmt.Errorf("error processing WireGuard output: %w", err)
 	}
@@ -77,7 +86,7 @@ func (w *wireGuardService) GetDockerStats(ctx context.Context, interfaceName, co
 	}, nil
 }
 
-func (w *wireGuardService) GetExternalStats() (*models.WireGuardStatsResponse, error) {
+func (s *wireGuardService) GetExternalStats() (*models.WireGuardStatsResponse, error) {
 	entries, err := os.ReadDir(wgExternalClientsDir)
 	if err != nil {
 		return nil, fmt.Errorf("error reading wireguard-clients directory: %w", err)
@@ -117,7 +126,7 @@ func (w *wireGuardService) GetExternalStats() (*models.WireGuardStatsResponse, e
 	}, nil
 }
 
-func (w *wireGuardService) processOutput(stdout *bytes.Buffer, timeout time.Duration) (total int, connected int, err error) {
+func (s *wireGuardService) processOutput(stdout *bytes.Buffer, timeout time.Duration) (total int, connected int, err error) {
 	scanner := bufio.NewScanner(stdout)
 
 	// Skip the first line

@@ -65,7 +65,7 @@ func main() {
 	uptimeKumaService := services.NewUptimeKumaService(conf.ServicesConfig)
 	linkwardenService := services.NewLinkwardenService(conf.ServicesConfig)
 	yourSpotifyService := services.NewYourSpotifyService(cacheInstance)
-	wireguardService := services.NewWireGuardService(dockerInstance)
+	wireguardService := services.NewWireGuardService(conf.ServicesConfig, dockerInstance)
 
 	// Setup handlers
 	adguardHandler := handlers.NewAdGuardHandler(adguardService)

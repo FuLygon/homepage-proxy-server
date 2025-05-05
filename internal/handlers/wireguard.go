@@ -12,11 +12,11 @@ type WireGuardHandler interface {
 }
 
 type wireGuardHandler struct {
-	config  *config.Config
+	config  config.ServicesConfig
 	service services.WireGuardService
 }
 
-func NewWireGuardHandler(config *config.Config, service services.WireGuardService) WUDHandler {
+func NewWireGuardHandler(config config.ServicesConfig, service services.WireGuardService) WUDHandler {
 	return &wireGuardHandler{
 		config:  config,
 		service: service,
@@ -24,11 +24,9 @@ func NewWireGuardHandler(config *config.Config, service services.WireGuardServic
 }
 
 func (h *wireGuardHandler) Handle(c *gin.Context) {
-	baseConfig := h.config.ServicesConfig.WireGuard
-
-	switch baseConfig.Method {
+	switch h.config.WireGuard.Method {
 	case "local":
-		response, err := h.service.GetLocalStats(baseConfig.Interface, baseConfig.Timeout)
+		response, err := h.service.GetLocalStats()
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": err.Error(),
@@ -37,7 +35,7 @@ func (h *wireGuardHandler) Handle(c *gin.Context) {
 		}
 		c.JSON(http.StatusOK, response)
 	case "docker":
-		response, err := h.service.GetDockerStats(c.Request.Context(), baseConfig.Interface, baseConfig.DockerContainer, baseConfig.Timeout)
+		response, err := h.service.GetDockerStats(c.Request.Context())
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": err.Error(),
