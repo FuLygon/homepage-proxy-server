@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"homepage-widgets-gateway/config"
 	"homepage-widgets-gateway/internal/cache"
 	"homepage-widgets-gateway/internal/models"
 	"net/http"
@@ -14,28 +15,35 @@ const npmAuthTokenCacheKey = "npm_auth_token"
 const npmAuthTokenExpiry = "npm_auth_expiry"
 
 type NPMService interface {
-	GetStats(baseUrl, authToken string) (*[]models.NPMStatsResponse, error)
-	Login(baseUrl, username, password string) (*models.NPMAuthResponse, error)
+	GetStats(authToken string) (*[]models.NPMStatsResponse, error)
+	Login() (*models.NPMAuthResponse, error)
 }
 
 type npmService struct {
-	client *http.Client
-	cache  cache.Cache
+	client   *http.Client
+	cache    cache.Cache
+	baseUrl  string
+	username string
+	password string
 }
 
-func NewNPMService(cache cache.Cache) NPMService {
+func NewNPMService(serviceConfig config.ServicesConfig, cache cache.Cache) NPMService {
+	baseConfig := serviceConfig.NginxProxyManager
 	return &npmService{
 		client: &http.Client{
 			Timeout: 10 * time.Second,
 		},
-		cache: cache,
+		cache:    cache,
+		baseUrl:  baseConfig.Url,
+		username: baseConfig.Username,
+		password: baseConfig.Password,
 	}
 }
 
 // GetStats implement from https://github.com/gethomepage/homepage/blob/main/src/widgets/npm/component.jsx
-func (s *npmService) GetStats(baseUrl, authToken string) (*[]models.NPMStatsResponse, error) {
+func (s *npmService) GetStats(authToken string) (*[]models.NPMStatsResponse, error) {
 	// Prepare stats request
-	statsReq, err := http.NewRequest("GET", fmt.Sprintf("%s/api/nginx/proxy-hosts", baseUrl), nil)
+	statsReq, err := http.NewRequest("GET", fmt.Sprintf("%s/api/nginx/proxy-hosts", s.baseUrl), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to prepare stats request: %w", err)
 	}
@@ -63,7 +71,7 @@ func (s *npmService) GetStats(baseUrl, authToken string) (*[]models.NPMStatsResp
 }
 
 // Login implement from https://github.com/gethomepage/homepage/blob/main/src/widgets/npm/proxy.js
-func (s *npmService) Login(baseUrl, username, password string) (*models.NPMAuthResponse, error) {
+func (s *npmService) Login() (*models.NPMAuthResponse, error) {
 	var npmAuthResponse models.NPMAuthResponse
 
 	// Attempt to retrieve auth token and expiry from cache
@@ -76,8 +84,8 @@ func (s *npmService) Login(baseUrl, username, password string) (*models.NPMAuthR
 		npmAuthResponse.Expires = npmAuthExpiryCache.(time.Time)
 	} else {
 		loginReq := models.NPMAuthRequest{
-			Identity: username,
-			Secret:   password,
+			Identity: s.username,
+			Secret:   s.password,
 		}
 
 		// Login request JSON
@@ -87,7 +95,7 @@ func (s *npmService) Login(baseUrl, username, password string) (*models.NPMAuthR
 		}
 
 		// Prepare login request
-		loginResp, err := s.client.Post(fmt.Sprintf("%s/api/tokens", baseUrl), "application/json", bytes.NewBuffer(loginJSON))
+		loginResp, err := s.client.Post(fmt.Sprintf("%s/api/tokens", s.baseUrl), "application/json", bytes.NewBuffer(loginJSON))
 		if err != nil {
 			return &npmAuthResponse, fmt.Errorf("failed to prepare login request: %w", err)
 		}
