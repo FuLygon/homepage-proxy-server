@@ -48,7 +48,3 @@ widget:
   "artists_listened": 5
 }
 ```
-
-- `songs_listened` `int64`: The number of songs listened.
-- `time_listened` `int64`: The total time (_minute_) spent listening to music.
-- `artists_listened` `int`: The number of unique artists listened.
