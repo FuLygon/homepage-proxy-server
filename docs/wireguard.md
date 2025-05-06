@@ -122,6 +122,3 @@ widget:
   "connected": 2
 }
 ```
-
-- `total` `int`: The total number of clients.
-- `connected` `int`: The number of connected clients.
