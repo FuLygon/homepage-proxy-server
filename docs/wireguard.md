@@ -1,4 +1,4 @@
-# WireGuard Widgets Configuration
+# WireGuard widget configuration
 
 Note that if you're using [wg-easy](https://github.com/wg-easy/wg-easy), Homepage already has it integrated [here](https://gethomepage.dev/widgets/services/wgeasy)
 
@@ -115,6 +115,8 @@ widget:
 ```
 
 ## API Response
+
+`GET /wireguards`
 
 ```json
 {
