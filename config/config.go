@@ -64,6 +64,13 @@ type ServicesConfig struct {
 		Timeout         int    `env:"SERVICE_WIREGUARD_TIMEOUT" envDefault:"5"`
 		DockerContainer string `env:"SERVICE_WIREGUARD_DOCKER_CONTAINER"`
 	}
+	Komodo struct {
+		Enabled    bool     `env:"SERVICE_KOMODO_ENABLED" envDefault:"false"`
+		Url        string   `env:"SERVICE_KOMODO_URL"`
+		Key        string   `env:"SERVICE_KOMODO_KEY"`
+		Secret     string   `env:"SERVICE_KOMODO_SECRET"`
+		ExtraStats []string `env:"SERVICE_KOMODO_EXTRA_STATS" envSeparator:","`
+	}
 }
 
 // LoadConfig loads configuration from environment variables
@@ -159,5 +166,32 @@ func validateServicesConfig(cfg *Config) error {
 			return fmt.Errorf("missing Docker container name for WireGuard")
 		}
 	}
+
+	// Validate Komodo
+	if config := cfg.Komodo; config.Enabled {
+		if config.Url == "" || config.Key == "" || config.Secret == "" {
+			return fmt.Errorf("missing configuration for Komodo")
+		}
+
+		validExtraStats := map[string]struct{}{
+			"stack":         {},
+			"build":         {},
+			"repo":          {},
+			"action":        {},
+			"builder":       {},
+			"deployment":    {},
+			"procedure":     {},
+			"resource-sync": {},
+		}
+
+		if len(config.ExtraStats) > 0 {
+			for _, stat := range config.ExtraStats {
+				if _, ok := validExtraStats[stat]; !ok {
+					return fmt.Errorf("invalid komodo extra stats config: %s", stat)
+				}
+			}
+		}
+	}
+
 	return nil
 }

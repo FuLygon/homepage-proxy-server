@@ -37,6 +37,8 @@ Currently only support a few integrations:
 - WUD (What's Up Docker)
 
 Integrations that Homepage doesn't support (will be using Custom API widget):
+
+- Komodo
 - WireGuard
 - Your Spotify
 
@@ -99,4 +101,4 @@ go build -o homepage-widgets-gateway ./cmd/main.go
 
 An example Homepage widgets configuration with the API Gateway can be found [here](docs/homepage-widgets.md).
 
-Note that the API Gateway is not meant to be accessed **publicly**, only accessible by Homepage proxy. So make sure to configure your network settings (port mapping, firewall rules, ...). Also enable Homepage `hideErrors` to [disable widget error messages](https://gethomepage.dev/configs/settings/#hide-widget-error-messages), unless you are debugging.
+Note that the API Gateway is not meant to be accessed **publicly**, only accessible by Homepage proxy. So make sure to configure your network settings (port mapping, firewall rules, ...)

@@ -23,6 +23,7 @@ type routes struct {
 	linkwardenHandler  handlers.LinkwardenHandler
 	yourSpotifyHandler handlers.YourSpotifyHandler
 	wireGuardHandler   handlers.WireGuardHandler
+	komodoHandler      handlers.KomodoHandler
 }
 
 func NewRoutes(
@@ -37,6 +38,7 @@ func NewRoutes(
 	linkwardenHandler handlers.LinkwardenHandler,
 	yourSpotifyHandler handlers.YourSpotifyHandler,
 	wireGuardHandler handlers.WireGuardHandler,
+	komodoHandler handlers.KomodoHandler,
 ) Routes {
 	return &routes{
 		router:             router,
@@ -50,6 +52,7 @@ func NewRoutes(
 		linkwardenHandler:  linkwardenHandler,
 		yourSpotifyHandler: yourSpotifyHandler,
 		wireGuardHandler:   wireGuardHandler,
+		komodoHandler:      komodoHandler,
 	}
 }
 
@@ -95,6 +98,9 @@ func (r *routes) RegisterRoutes() {
 
 	// WireGuard
 	r.registerServiceRoute(router.GET, "/wireguard", servicesConfig.WireGuard.Enabled, r.wireGuardHandler.Handle)
+
+	// Komodo
+	r.registerServiceRoute(router.GET, "/komodo", servicesConfig.Komodo.Enabled, r.komodoHandler.Handle)
 }
 
 // registerServiceRoute registers a route if the service is enabled

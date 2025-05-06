@@ -18,6 +18,26 @@ widget:
   url: http://homepage-widgets-gateway:8080/gotify
 ```
 
+### [Komodo](komodo.md)
+
+```yaml
+widget:
+  type: customapi
+  url: http://homepage-widgets-gateway:8080/komodo
+  refreshInterval: 300000 # 5 minutes
+  method: GET
+  mappings:
+    - field: container.running
+      label: Running
+      format: number
+    - field: container.stopped
+      label: Stopped
+      format: number
+    - field: container.total
+      label: Total
+      format: number
+```
+
 ### [Linkwarden](https://gethomepage.dev/widgets/services/linkwarden)
 
 ```yaml
