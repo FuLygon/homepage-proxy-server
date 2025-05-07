@@ -68,6 +68,7 @@ func main() {
 	yourSpotifyService := services.NewYourSpotifyService(serviceConfig, cacheInstance)
 	wireguardService := services.NewWireGuardService(serviceConfig, dockerInstance)
 	komodoService := services.NewKomodoService(serviceConfig)
+	asfService := services.NewASFService(serviceConfig)
 
 	// Setup handlers
 	adguardHandler := handlers.NewAdGuardHandler(adguardService)
@@ -80,6 +81,7 @@ func main() {
 	yourSpotifyHandler := handlers.NewYourSpotifyHandler(yourSpotifyService)
 	wireguardHandler := handlers.NewWireGuardHandler(serviceConfig, wireguardService)
 	komodoHandler := handlers.NewKomodoHandler(komodoService)
+	asfHandler := handlers.NewASFHandler(asfService)
 
 	// Setup routes
 	r := routes.NewRoutes(
@@ -95,6 +97,7 @@ func main() {
 		yourSpotifyHandler,
 		wireguardHandler,
 		komodoHandler,
+		asfHandler,
 	)
 
 	// Register routes

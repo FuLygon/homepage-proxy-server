@@ -71,6 +71,11 @@ type ServicesConfig struct {
 		Secret     string   `env:"SERVICE_KOMODO_SECRET"`
 		ExtraStats []string `env:"SERVICE_KOMODO_EXTRA_STATS" envSeparator:","`
 	}
+	ASF struct {
+		Enabled     bool   `env:"SERVICE_ASF_ENABLED" envDefault:"false"`
+		Url         string `env:"SERVICE_ASF_URL"`
+		IPCPassword string `env:"SERVICE_ASF_IPC_PASSWORD"`
+	}
 }
 
 // LoadConfig loads configuration from environment variables
@@ -190,6 +195,13 @@ func validateServicesConfig(cfg *Config) error {
 					return fmt.Errorf("invalid komodo extra stats config: %s", stat)
 				}
 			}
+		}
+	}
+
+	// Validate ASF
+	if config := cfg.ASF; config.Enabled {
+		if config.Url == "" || config.IPCPassword == "" {
+			return fmt.Errorf("missing configuration for ASF")
 		}
 	}
 

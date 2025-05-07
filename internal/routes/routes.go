@@ -24,6 +24,7 @@ type routes struct {
 	yourSpotifyHandler handlers.YourSpotifyHandler
 	wireGuardHandler   handlers.WireGuardHandler
 	komodoHandler      handlers.KomodoHandler
+	asfHandler         handlers.ASFHandler
 }
 
 func NewRoutes(
@@ -39,6 +40,7 @@ func NewRoutes(
 	yourSpotifyHandler handlers.YourSpotifyHandler,
 	wireGuardHandler handlers.WireGuardHandler,
 	komodoHandler handlers.KomodoHandler,
+	asfHandler handlers.ASFHandler,
 ) Routes {
 	return &routes{
 		router:             router,
@@ -53,6 +55,7 @@ func NewRoutes(
 		yourSpotifyHandler: yourSpotifyHandler,
 		wireGuardHandler:   wireGuardHandler,
 		komodoHandler:      komodoHandler,
+		asfHandler:         asfHandler,
 	}
 }
 
@@ -101,6 +104,9 @@ func (r *routes) RegisterRoutes() {
 
 	// Komodo
 	r.registerServiceRoute(router.GET, "/komodo", servicesConfig.Komodo.Enabled, r.komodoHandler.Handle)
+
+	// ASF (ArchiSteamFarm)
+	r.registerServiceRoute(router.GET, "/asf", servicesConfig.ASF.Enabled, r.asfHandler.Handle)
 }
 
 // registerServiceRoute registers a route if the service is enabled

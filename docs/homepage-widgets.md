@@ -10,6 +10,26 @@ widget:
   url: http://homepage-widgets-gateway:8080/adguard-home
 ```
 
+### ASF (ArchiSteamFarm)
+
+```yaml
+widget:
+  type: customapi
+  url: http://homepage-widgets-gateway:8080/asf
+  refreshInterval: 300000 # 5 minutes
+  method: GET
+  mappings:
+    - field: total
+      label: Total
+      format: number
+    - field: online
+      label: Online
+      format: number
+    - field: cards_remaining
+      label: Cards Remaining
+      format: number
+```
+
 ### [Gotify](https://gethomepage.dev/widgets/services/gotify)
 
 ```yaml

@@ -38,6 +38,7 @@ Currently only support a few integrations:
 
 Integrations that Homepage doesn't support (will be using Custom API widget):
 
+- ASF (ArchiSteamFarm)
 - Komodo
 - WireGuard
 - Your Spotify
